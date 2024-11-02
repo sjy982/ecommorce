@@ -10,4 +10,9 @@ class EcommerceApplicationTests {
 	void contextLoads() {
 	}
 
+	@Test
+	void test() {
+
+	}
+
 }
