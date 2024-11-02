@@ -23,6 +23,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '17'
+          distribution: 'temurin'  # 또는 'zulu', 'adopt' 등 원하는 JDK 배포판 지정
 
       - name: Build with Gradle
         run: ./gradlew build
