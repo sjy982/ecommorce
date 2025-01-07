@@ -1,0 +1,28 @@
+jwt:
+  secret-key: ${JWT_SECRET_KEY:}
+  rt-secret-key: ${JWT_RT_SECRET_KEY}
+  validity-in-milliseconds: ${JWT_VALIDITY_MS}
+  rt-validity-in-milliseconds: ${JWT_RT_VALIDITY_MS}
+  temp-validity-in-milliseconds: ${JWT_TEMP_VALIDITY_MS}
+
+spring:
+  application:
+    name: ecommerce
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - email
+              - profile
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+server:
+  port: 8080
