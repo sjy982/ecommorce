@@ -53,8 +53,9 @@ jobs:
         run: ./gradlew clean build --no-daemon --stacktrace
 
       # 테스트 실행
-      - name: Run tests
-        run: ./gradlew test --no-daemon --stacktrace
+      - name: Build and test with Gradle
+        run: ./gradlew test -Dspring.profiles.active=test --stacktrace
+
 
       # 파일 디버깅
       - name: Debug file structure
