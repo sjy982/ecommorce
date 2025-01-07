@@ -1,0 +1,20 @@
+name: Test Application.yml Loading
+
+on:
+  push:
+    branches:
+      - main
+      - feature/*
+
+jobs:
+  debug-file-structure:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Debug file structure
+      - name: Debug file structure
+        run: ls -R
