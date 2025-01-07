@@ -37,5 +37,4 @@ out/
 .vscode/
 
 ### 환경 변수 파일 제외 ###
-.env
-/src/main/resources/properties/env.properties
+*.env
