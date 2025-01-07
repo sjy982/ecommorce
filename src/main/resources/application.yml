@@ -1,9 +1,16 @@
+#jwt:
+#  secret-key: ${JWT_SECRET_KEY:}
+#  rt-secret-key: ${JWT_RT_SECRET_KEY}
+#  validity-in-milliseconds: ${JWT_VALIDITY_MS}
+#  rt-validity-in-milliseconds: ${JWT_RT_VALIDITY_MS}
+#  temp-validity-in-milliseconds: ${JWT_TEMP_VALIDITY_MS}
+
 jwt:
-  secret-key: ${JWT_SECRET_KEY:}
-  rt-secret-key: ${JWT_RT_SECRET_KEY}
-  validity-in-milliseconds: ${JWT_VALIDITY_MS}
-  rt-validity-in-milliseconds: ${JWT_RT_VALIDITY_MS}
-  temp-validity-in-milliseconds: ${JWT_TEMP_VALIDITY_MS}
+  secret-key: dGVzdC1sb25nLWxvbmctbG9uZy1sb25nLWxvbmctbG9uZy1zZWNyZXQta2V5
+  rt-secret-key: dGVzdC1kaWZmZXJlbnQtbG9uZy1sb25nLWxvbmctbG9uZy1zZWNyZXQta2V5
+  validity-in-milliseconds: 3600000
+  rt-validity-in-milliseconds: 7200000
+  temp-validity-in-milliseconds: 600000
 
 spring:
   application:
@@ -20,9 +27,14 @@ spring:
             scope:
               - email
               - profile
+
   data:
     redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
+      host: localhost
+      port: 6379
+#  data:
+#    redis:
+#      host: ${REDIS_HOST}
+#      port: ${REDIS_PORT}
 server:
   port: 8080
