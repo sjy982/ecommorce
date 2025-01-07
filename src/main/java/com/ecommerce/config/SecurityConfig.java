@@ -1,0 +1,82 @@
+package com.ecommerce.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.ecommerce.auth.filter.JwtAuthenticationFilter;
+import com.ecommerce.auth.filter.JwtExceptionFilter;
+import com.ecommerce.auth.filter.JwtRefreshTokenFilter;
+import com.ecommerce.auth.handler.CustomAuthenticationSuccessHandler;
+import com.ecommerce.auth.jwt.JwtProvider;
+import com.ecommerce.auth.service.CustomOAuth2UserService;
+import com.ecommerce.user.model.UserRole;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.RequiredArgsConstructor;
+
+@Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
+public class SecurityConfig  {
+    private static final String[] JWT_PATH = {"/api/**"};
+    private static final String[] OAUTH2_PATH = {"/api/auth/login/**", "/oauth2/**", "/login/**"};
+
+    private final ObjectMapper objectMapper;
+
+    private final JwtProvider jwtProvider;
+
+    private final CustomAuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+
+    private final CustomOAuth2UserService customOAuth2UserService;
+
+    private static void applyCommonSettings(HttpSecurity http) throws Exception {
+        http.csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+    }
+
+    @Bean
+    @Order(1)
+    public SecurityFilterChain oauthFilterChain(HttpSecurity http) throws Exception {
+        applyCommonSettings(http);
+        http.securityMatcher(OAUTH2_PATH)
+            .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+            .oauth2Login(oauth2 -> oauth2
+                    .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                    .successHandler(oAuth2AuthenticationSuccessHandler));
+        return http.build();
+    }
+
+    @Bean
+    @Order(2)
+    public SecurityFilterChain refreshTokenFilterChain(HttpSecurity http) throws Exception {
+        applyCommonSettings(http);
+        http.securityMatcher("/api/users/refresh")
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll())
+                .addFilterBefore(new JwtRefreshTokenFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtExceptionFilter(objectMapper), JwtRefreshTokenFilter.class);
+        return http.build();
+    }
+
+    @Bean
+    @Order(3)
+    public SecurityFilterChain jwtFilterChain(HttpSecurity http) throws Exception {
+        applyCommonSettings(http);
+        http.securityMatcher(JWT_PATH)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.POST, "api/users").hasRole(UserRole.TEMP.name())
+                        .requestMatchers("api/admin/**").hasRole(UserRole.ADMIN.name())
+                        .anyRequest().permitAll())
+                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtExceptionFilter(objectMapper), JwtAuthenticationFilter.class);
+        return http.build();
+    }
+}
