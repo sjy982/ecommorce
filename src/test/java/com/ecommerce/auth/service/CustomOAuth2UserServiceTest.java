@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ import com.ecommerce.auth.model.CustomOAuth2UserDetails;
 import com.ecommerce.auth.provider.GoogleUserInfo;
 
 import com.ecommerce.auth.provider.OAuth2UserInfoProvider;
+import com.ecommerce.user.model.User;
 import com.ecommerce.user.model.UserRole;
 import com.ecommerce.user.repository.UserRepository;
 
@@ -33,7 +35,7 @@ class CustomOAuth2UserServiceTest {
     @Mock
     private DefaultOAuth2UserService defaultOAuth2UserService;
     @Mock
-    private UserRepository userInMemoryRepository;
+    private UserRepository userRepository;
 
     @Mock
     private OAuth2UserRequest userRequest;
@@ -65,17 +67,53 @@ class CustomOAuth2UserServiceTest {
         when(userRequest.getClientRegistration()).thenReturn(clientRegistration);
         when(oAuth2UserInfoProvider.getOAuth2UserInfo(provider, oAuth2User))
                 .thenReturn(new GoogleUserInfo(oAuth2User));
-        when(userInMemoryRepository.findByLoginId(providerId)).thenReturn(null);
+        when(userRepository.findByProviderId(providerId)).thenReturn(Optional.empty());
 
         // When
         CustomOAuth2UserDetails result = (CustomOAuth2UserDetails) customOAuth2UserService.loadUser(userRequest);
 
         // Then
         assertEquals(providerId, result.getUser().getProviderId());
-        assertEquals(UserRole.TEMP, result.getUser().getRole());
+        assertEquals(UserRole.TEMP, result.getRole());
         assertEquals(email, result.getUser().getEmail());
         assertEquals(name, result.getUser().getName());
-        verify(userInMemoryRepository, times(1)).findByLoginId(providerId);
+        verify(userRepository, times(1)).findByProviderId(providerId);
+    }
+
+    @Test
+    @DisplayName("기존 사용자가 로그인하면 User 역할로 사용자 생성")
+    void shouldCreateUserWithUserRoleWhenExistingUserLogsIn() {
+        //Given
+        String provider = "google";
+        String subject = "12345";
+        String email = "test@example.com";
+        String name = "Test User";
+        String providerId = provider + "_" + subject;
+        User user = User.builder()
+                        .name(name)
+                        .providerId(providerId)
+                        .subject(subject)
+                        .email(email)
+                        .provider(provider)
+                        .build();
+        when(oAuth2User.getAttributes()).thenReturn(Map.of("sub", subject, "email", email, "name", name));
+        when(defaultOAuth2UserService.loadUser(userRequest)).thenReturn(oAuth2User);
+
+        when(clientRegistration.getRegistrationId()).thenReturn(provider);
+        when(userRequest.getClientRegistration()).thenReturn(clientRegistration);
+        when(oAuth2UserInfoProvider.getOAuth2UserInfo(provider, oAuth2User))
+                .thenReturn(new GoogleUserInfo(oAuth2User));
+        when(userRepository.findByProviderId(providerId)).thenReturn(Optional.of(user));
+
+        // When
+        CustomOAuth2UserDetails result = (CustomOAuth2UserDetails) customOAuth2UserService.loadUser(userRequest);
+
+        // Then
+        assertEquals(providerId, result.getUser().getProviderId());
+        assertEquals(UserRole.USER, result.getRole());
+        assertEquals(email, result.getUser().getEmail());
+        assertEquals(name, result.getUser().getName());
+        verify(userRepository, times(1)).findByProviderId(providerId);
     }
 
     @Test
