@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -26,6 +25,7 @@ import com.ecommerce.common.response.ApiResponse;
 import com.ecommerce.common.response.ApiResponseUtil;
 import com.ecommerce.user.model.User;
 import com.ecommerce.user.model.UserRole;
+import com.ecommerce.user.service.RefreshTokenRedisService;
 import com.ecommerce.user.service.UserRedisService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,6 +47,9 @@ class CustomAuthenticationSuccessHandlerTest {
     @Mock
     private CustomOAuth2UserDetails userDetails;
 
+    @Mock
+    private RefreshTokenRedisService refreshTokenRedisService;
+
     private ObjectMapper objectMapper;
 
     private AuthenticationSuccessResponseDto successResponseDto;
@@ -66,6 +69,7 @@ class CustomAuthenticationSuccessHandlerTest {
                 jwtProvider,
                 objectMapper,
                 userRedisService,
+                refreshTokenRedisService,
                 successResponseDto
         );
     }
@@ -79,10 +83,10 @@ class CustomAuthenticationSuccessHandlerTest {
 
         User tempUser = new User();
         tempUser.setProviderId("provider123");
-        tempUser.setRole(UserRole.TEMP);
 
         when(authentication.getPrincipal()).thenReturn(userDetails);
         when(userDetails.getUser()).thenReturn(tempUser);
+        when(userDetails.getRole()).thenReturn(UserRole.TEMP);
         when(jwtProvider.createTempToken("provider123")).thenReturn("temp-token");
 
         // When
@@ -109,19 +113,23 @@ class CustomAuthenticationSuccessHandlerTest {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
+        String providerId = "provider123";
+        String accessToken = "access-token";
+        String refreshToken = "refresh-token";
         User normalUser = new User();
-        normalUser.setProviderId("provider123");
-        normalUser.setRole(UserRole.USER);
+        normalUser.setProviderId(providerId);
 
         when(authentication.getPrincipal()).thenReturn(userDetails);
         when(userDetails.getUser()).thenReturn(normalUser);
-        when(jwtProvider.createAccessToken("provider123", UserRole.USER)).thenReturn("access-token");
-        when(jwtProvider.createRefreshToken("provider123")).thenReturn("refresh-token");
+        when(userDetails.getRole()).thenReturn(UserRole.USER);
+        when(jwtProvider.createAccessToken(providerId, UserRole.USER)).thenReturn(accessToken);
+        when(jwtProvider.createRefreshToken(providerId)).thenReturn(refreshToken);
 
         // When
         successHandler.onAuthenticationSuccess(request, response, authentication);
 
         // Then
+        verify(refreshTokenRedisService, times(1)).save(providerId, refreshToken);
         assertEquals("Bearer access-token", response.getHeader("Authorization"));
         assertEquals("refresh-token", response.getHeader("Refresh-Token"));
 

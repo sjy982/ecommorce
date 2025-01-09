@@ -35,7 +35,7 @@ class UserServiceTest {
     private UserRedisService userRedisService;
 
     @Mock
-    private UserRepository inMemoryUserRepository;
+    private UserRepository userRepository;
 
     @InjectMocks
     private UserService userService;
@@ -63,7 +63,7 @@ class UserServiceTest {
         assertEquals("refresh-token", response.getRefreshToken());
         assertEquals(phone, response.getUser().getPhone());
         assertEquals(address, response.getUser().getAddress());
-        verify(inMemoryUserRepository, times(1)).save(user);
+        verify(userRepository, times(1)).save(user);
         verify(userRedisService, times(1)).delete(providerId);
         verify(refreshTokenRedisService, times(1)).save(providerId, "refresh-token");
     }

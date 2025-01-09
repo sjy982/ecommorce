@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,7 +46,13 @@ class UserRedisServiceTest {
     void save_ShouldSaveUserInRedis() throws JsonProcessingException {
         // Given
         String key = "testKey";
-        User user = new User();
+        User user = User.builder()
+                        .provider("test provider")
+                        .providerId("test providerId")
+                        .subject("test subject")
+                        .email("test email")
+                        .name("Test User")
+                        .build();
         user.setName("Test User");
         String json = "{\"name\":\"Test User\"}";
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);

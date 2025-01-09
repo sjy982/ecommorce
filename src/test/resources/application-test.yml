@@ -8,8 +8,6 @@ jwt:
 spring:
   application:
     name: ecommerce-test
-  autoconfigure:
-    exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
   security:
     oauth2:
       client:
