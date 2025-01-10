@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ecommerce.auth.jwt.JwtProvider;
+import com.ecommerce.cart.model.Cart;
 import com.ecommerce.user.Dto.RegisterUserRequestDto;
 import com.ecommerce.user.Dto.RegisterUserResponseDto;
 import com.ecommerce.user.Dto.TokenResponseDto;
@@ -38,6 +39,8 @@ public class UserService {
         }
         user.setPhone(registerUserRequestDto.getPhone());
         user.setAddress(registerUserRequestDto.getAddress());
+        Cart cart = new Cart();
+        user.setCart(cart);
 
         userRepository.save(user);
         userRedisService.delete(providerId);
