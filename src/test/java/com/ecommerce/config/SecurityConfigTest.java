@@ -2,21 +2,16 @@ package com.ecommerce.config;
 
 import static com.ecommerce.config.TestConstants.TEST_PROVIDER_ID;
 import static org.mockito.ArgumentMatchers.any;
-
 import static org.mockito.Mockito.when;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-
 import org.springframework.boot.test.mock.mockito.MockBean;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -38,9 +33,10 @@ class SecurityConfigTest {
 
     @MockBean
     private JwtProvider jwtProvider;
+
     @Test
     @DisplayName("OAuth2 경로 접근 시 인증이 필요하다")
-    void unauthenticatedUser_ShouldBeRedirectedToLogin() throws Exception {
+    void givenUnauthenticatedUser_whenAccessingOAuth2Endpoint_thenRedirectToLogin() throws Exception {
         // When & Then
         mockMvc.perform(get("/api/auth/login"))
                .andExpect(status().isFound());
@@ -48,8 +44,8 @@ class SecurityConfigTest {
 
     @Test
     @DisplayName("Refresh Token 경로는 인증 없이 접근 가능하다. 물론 올바른 Refresh Token이 필요하다.")
-    void refreshTokenFilterChain_ShouldPermitAll() throws Exception {
-        //Given
+    void givenValidRefreshToken_whenAccessingRefreshTokenEndpoint_thenAllowAccess() throws Exception {
+        // Given
         String refreshToken = "valid-refresh-token";
         when(jwtProvider.resolveRefreshToken(any(HttpServletRequest.class))).thenReturn(refreshToken);
         when(jwtProvider.validateRefreshToken(refreshToken)).thenReturn(true);
@@ -57,15 +53,15 @@ class SecurityConfigTest {
         when(userController.refreshAccessToken(refreshToken, TEST_PROVIDER_ID))
                 .thenReturn(ResponseEntity.ok().build());
 
-        //When && Then
+        // When & Then
         mockMvc.perform(post("/api/users/refresh")
                                 .header("Refresh-Token", refreshToken))
-                .andExpect(status().isOk());
+               .andExpect(status().isOk());
     }
 
     @Test
     @DisplayName("올바르지 않은 Refresh Token이 주어졌을 때 401 Unauthorized가 반환된다.")
-    void refreshTokenFilterChain_InvalidToken_ShouldReturnUnauthorized() throws Exception {
+    void givenInvalidRefreshToken_whenAccessingRefreshTokenEndpoint_thenReturnUnauthorized() throws Exception {
         // Given
         String invalidRefreshToken = "invalid-refresh-token";
         when(jwtProvider.resolveRefreshToken(any(HttpServletRequest.class))).thenReturn(invalidRefreshToken);
@@ -79,8 +75,8 @@ class SecurityConfigTest {
 
     @Test
     @DisplayName("TEMP 권한이 없는 사용자는 /users 경로에 접근할 수 없다")
-    void tempRoleMissing_ShouldReturnForbidden_ForUsersEndpoint() throws Exception {
-        // When & Then
+    void givenUserWithoutTempRole_whenAccessingUsersEndpoint_thenReturnForbidden() throws Exception {
+        // Given
         String accessToken = "valid-access-token";
 
         when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(accessToken);
@@ -88,15 +84,16 @@ class SecurityConfigTest {
         when(jwtProvider.getSubjectFromAccessToken(accessToken)).thenReturn(TEST_PROVIDER_ID);
         when(jwtProvider.getRoleFromToken(accessToken)).thenReturn("USER");
 
+        // When & Then
         mockMvc.perform(post("/api/users")
                                 .header("Authorization", "Bearer " + accessToken))
                .andExpect(status().isForbidden());
     }
 
     @Test
-    @DisplayName("Temp 권한이 있는 경우 /users에 접근할 수 있다")
-    void tempRolePresent_ShouldAllowAccess_ToUsersEndpoint() throws Exception {
-        // When & Then
+    @DisplayName("TEMP 권한이 있는 경우 /users에 접근할 수 있다")
+    void givenUserWithTempRole_whenAccessingUsersEndpoint_thenAllowAccess() throws Exception {
+        // Given
         String accessToken = "valid-access-token";
         String requestBody = "{\"phone\": \"010-1111-1111\", \"address\": \"test address\"}";
 
@@ -108,6 +105,7 @@ class SecurityConfigTest {
         when(userController.registerUser(any(RegisterUserRequestDto.class)))
                 .thenReturn(ResponseEntity.ok().build());
 
+        // When & Then
         mockMvc.perform(post("/api/users")
                                 .header("Authorization", "Bearer " + accessToken)
                                 .contentType("application/json")
@@ -117,7 +115,7 @@ class SecurityConfigTest {
 
     @Test
     @DisplayName("올바르지 않은 AccessToken이 주어졌을 때 401 Unauthorized를 반환한다.")
-    void invalidAccessToken_ShouldReturnUnauthorized() throws Exception {
+    void givenInvalidAccessToken_whenAccessingUsersEndpoint_thenReturnUnauthorized() throws Exception {
         // Given
         String invalidAccessToken = "invalid-access-token";
         when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(invalidAccessToken);
