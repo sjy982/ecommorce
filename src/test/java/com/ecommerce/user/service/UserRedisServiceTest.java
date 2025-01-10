@@ -38,12 +38,13 @@ class UserRedisServiceTest {
 
     @InjectMocks
     private UserRedisService userRedisService;
+
     private final Duration timeoutDuration = Duration.ofMinutes(10);
     private final String prefix = "signup:temp:";
 
     @Test
-    @DisplayName("save 메서드가 정상적으로 Redis에 데이터를 저장해야 한다")
-    void save_ShouldSaveUserInRedis() throws JsonProcessingException {
+    @DisplayName("Redis에 데이터를 저장해야 한다")
+    void givenKeyAndUser_whenSaveCalled_thenShouldSaveUserInRedis() throws JsonProcessingException {
         // Given
         String key = "testKey";
         User user = User.builder()
@@ -53,7 +54,6 @@ class UserRedisServiceTest {
                         .email("test email")
                         .name("Test User")
                         .build();
-        user.setName("Test User");
         String json = "{\"name\":\"Test User\"}";
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(objectMapper.writeValueAsString(user)).thenReturn(json);
@@ -66,8 +66,8 @@ class UserRedisServiceTest {
     }
 
     @Test
-    @DisplayName("get 메서드가 Redis에서 데이터를 가져와 User 객체로 변환해야 한다")
-    void get_ShouldRetrieveUserFromRedis() throws JsonProcessingException {
+    @DisplayName("Redis에서 데이터를 가져와 User 객체로 변환해야 한다")
+    void givenKey_whenGetCalled_thenShouldRetrieveUserFromRedis() throws JsonProcessingException {
         // Given
         String key = "testKey";
         String json = "{\"name\":\"Test User\"}";
@@ -86,8 +86,8 @@ class UserRedisServiceTest {
     }
 
     @Test
-    @DisplayName("get 메서드가 Redis에서 null 데이터를 가져올 때 null을 반환해야 한다")
-    void get_ShouldReturnNullWhenKeyDoesNotExist() {
+    @DisplayName("Redis에서 키가 존재하지 않으면 null을 반환해야 한다")
+    void givenNonexistentKey_whenGetCalled_thenShouldReturnNull() {
         // Given
         String key = "nonexistentKey";
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
@@ -101,8 +101,8 @@ class UserRedisServiceTest {
     }
 
     @Test
-    @DisplayName("get 메서드가 JSON 변환에 실패하면 RuntimeException을 던져야 한다")
-    void get_ShouldThrowRuntimeException_WhenJsonDeserializationFails() throws JsonProcessingException {
+    @DisplayName("JSON 변환에 실패하면 RuntimeException을 던져야 한다")
+    void givenInvalidJson_whenGetCalled_thenShouldThrowRuntimeException() throws JsonProcessingException {
         // Given
         String key = "testKey";
         String invalidJson = "invalid-json";
@@ -115,8 +115,8 @@ class UserRedisServiceTest {
     }
 
     @Test
-    @DisplayName("delete 메서드가 Redis에서 데이터를 삭제해야 한다")
-    void delete_ShouldRemoveUserFromRedis() {
+    @DisplayName("Redis에서 데이터를 삭제해야 한다")
+    void givenKey_whenDeleteCalled_thenShouldRemoveUserFromRedis() {
         // Given
         String key = "testKey";
 
