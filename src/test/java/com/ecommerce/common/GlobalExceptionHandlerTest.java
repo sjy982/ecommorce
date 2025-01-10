@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +37,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     @DisplayName("유효하지 않은 DTO 요청으로 BAD_REQUEST 응답을 반환해야 한다")
-    void handleValidationExceptions_ShouldReturnBadRequest() throws Exception {
+    void givenInvalidDtoRequest_whenHandleValidationExceptions_thenReturnBadRequest() throws Exception {
         // Given: 잘못된 DTO 요청
         String invalidRequestBody = "{}";
 
@@ -53,7 +52,7 @@ class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("SessionExpiredException이 발생하면 UNAUTHORIZED 응답을 반환해야 한다")
     @WithMockCustomUser(username = TEST_PROVIDER_ID, role = TEST_TEMP_ROLE)
-    void handleSessionExpiredException_ShouldReturnUnauthorized() throws Exception {
+    void givenSessionExpiredException_whenHandleException_thenReturnUnauthorized() throws Exception {
         // Given: Service에서 예외 발생 설정
         RegisterUserRequestDto requestDto = new RegisterUserRequestDto();
         requestDto.setPhone("010-1234-4567");
@@ -71,10 +70,9 @@ class GlobalExceptionHandlerTest {
                .andExpect(jsonPath("$.message").value("session has expired."));
     }
 
-
     @Test
     @DisplayName("RefreshTokenException이 발생하면 UNAUTHORIZED 응답을 반환해야 한다")
-    void handleRefreshTokenException_ShouldReturnUnauthorized() throws Exception {
+    void givenRefreshTokenException_whenHandleException_thenReturnUnauthorized() throws Exception {
         // Given
         String refreshToken = "valid-refresh-token";
         String sub = "test-providerId";
@@ -92,7 +90,7 @@ class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("JsonProcessingException이 발생하면 INTERNAL_SERVER_ERROR 응답을 반환해야 한다")
     @WithMockCustomUser(username = TEST_PROVIDER_ID, role = TEST_TEMP_ROLE)
-    void handleJsonProcessingException_ShouldReturnInternalServerError() throws Exception {
+    void givenJsonProcessingException_whenHandleException_thenReturnInternalServerError() throws Exception {
         // Given: Service에서 예외 발생 설정
         RegisterUserRequestDto requestDto = new RegisterUserRequestDto();
         requestDto.setPhone("010-1234-4567");

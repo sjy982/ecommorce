@@ -17,8 +17,8 @@ class DatabaseTest {
     private EntityManager entityManager;
 
     @Test
-    @DisplayName("데이터베이스 연결이 정상적으로 이루어져야 한다.")
-    void should_establish_database_connection() {
+    @DisplayName("H2 데이터베이스와의 연결 확인")
+    void givenDatabase_whenQueryExecuted_thenConnectionShouldBeEstablished() {
         // When: H2 데이터베이스 연결 확인
         Integer result = (Integer) entityManager.createNativeQuery("SELECT 1").getSingleResult();
 

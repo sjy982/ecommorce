@@ -1,12 +1,14 @@
 package com.ecommerce.user.model;
 
+import com.ecommerce.cart.model.Cart;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
+@Entity(name = "user")
 @Data
 @Builder
 @NoArgsConstructor
@@ -19,7 +21,7 @@ public class User {
     @Column(nullable = false, unique = true)
     private String providerId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 15)
     private String provider;
 
     @Column(nullable = false)
@@ -28,12 +30,17 @@ public class User {
     @Column(nullable = false)
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String name;
 
-    @Column
+    @Column(length = 15)
     private String phone;
 
     @Column
     private String address;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "cartId")
+    private Cart cart;
+
 }

@@ -34,35 +34,35 @@ class JwtProviderTest {
 
     @Test
     @DisplayName("Access Token 생성 - 유효한 토큰 반환")
-    void createAccessTokenShouldReturnValidToken() {
+    void givenUserAndRole_whenCreateAccessToken_thenReturnValidToken() {
         String token = jwtProvider.createAccessToken("user123", UserRole.USER);
         assertNotNull(token, "Access Token은 null이어서는 안 됩니다.");
     }
 
     @Test
     @DisplayName("Refresh Token 생성 - 유효한 토큰 반환")
-    void createRefreshTokenShouldReturnValidToken() {
+    void givenUser_whenCreateRefreshToken_thenReturnValidToken() {
         String token = jwtProvider.createRefreshToken("user123");
         assertNotNull(token, "Refresh Token은 null이어서는 안 됩니다.");
     }
 
     @Test
     @DisplayName("Temp Token 생성 - 유효한 토큰 반환")
-    void createTempTokenShouldReturnValidToken() {
+    void givenUser_whenCreateTempToken_thenReturnValidToken() {
         String token = jwtProvider.createTempToken("user123");
         assertNotNull(token, "Temp Token은 null이어서는 안 됩니다.");
     }
 
     @Test
     @DisplayName("Access Token 검증 - 유효한 토큰이면 true 반환")
-    void validateAccessTokenWithValidTokenShouldReturnTrue() {
+    void givenValidAccessToken_whenValidateAccessToken_thenReturnTrue() {
         String token = jwtProvider.createAccessToken("user123", UserRole.USER);
         assertTrue(jwtProvider.validateAccessToken(token), "유효한 Access Token은 true를 반환해야 합니다.");
     }
 
     @Test
     @DisplayName("Access Token 검증 - 잘못된 서명 시 TokenInvalidException 발생")
-    void validateAccessTokenWithInvalidSignatureShouldThrowTokenInvalidException() {
+    void givenInvalidSignedToken_whenValidateAccessToken_thenThrowTokenInvalidException() {
         String invalidSignedToken = Jwts.builder()
                                         .setSubject("user123")
                                         .signWith(Keys.secretKeyFor(SignatureAlgorithm.HS256)) // 다른 키로 서명
@@ -72,14 +72,14 @@ class JwtProviderTest {
 
     @Test
     @DisplayName("Access Token 검증 - 잘못된 형식 시 TokenInvalidException 발생")
-    void validateAccessTokenWithMalformedTokenShouldThrowTokenInvalidException() {
+    void givenMalformedToken_whenValidateAccessToken_thenThrowTokenInvalidException() {
         String malformedToken = "malformedTokenWithoutTwoDots";
         assertThrows(TokenInvalidException.class, () -> jwtProvider.validateAccessToken(malformedToken));
     }
 
     @Test
     @DisplayName("Access Token 검증 - 만료된 토큰 시 TokenExpiredException 발생")
-    void validateAccessTokenWithExpiredTokenShouldThrowTokenExpiredException() throws InterruptedException {
+    void givenExpiredAccessToken_whenValidateAccessToken_thenThrowTokenExpiredException() throws InterruptedException {
         String token = jwtProvider.createAccessToken("user123", UserRole.USER);
         TimeUnit.MILLISECONDS.sleep(2500); // 토큰 만료 대기 (2초 유효)
         assertThrows(TokenExpiredException.class, () -> jwtProvider.validateAccessToken(token));
@@ -87,7 +87,7 @@ class JwtProviderTest {
 
     @Test
     @DisplayName("Access Token에서 Subject 추출")
-    void getSubjectFromAccessTokenShouldReturnCorrectSubject() {
+    void givenAccessToken_whenGetSubjectFromAccessToken_thenReturnCorrectSubject() {
         String token = jwtProvider.createAccessToken("user123", UserRole.USER);
         String subject = jwtProvider.getSubjectFromAccessToken(token);
         assertEquals("user123", subject, "추출된 subject는 원본과 일치해야 합니다.");
@@ -95,7 +95,7 @@ class JwtProviderTest {
 
     @Test
     @DisplayName("Access Token에서 Role 추출")
-    void getRoleFromTokenShouldReturnCorrectRole() {
+    void givenAccessToken_whenGetRoleFromToken_thenReturnCorrectRole() {
         String token = jwtProvider.createAccessToken("user123", UserRole.USER);
         String role = jwtProvider.getRoleFromToken(token);
         assertEquals("USER", role, "추출된 role은 원본과 일치해야 합니다.");
@@ -103,7 +103,7 @@ class JwtProviderTest {
 
     @Test
     @DisplayName("요청에서 Access Token 추출 - 유효한 헤더")
-    void resolveAccessTokenWithValidHeaderShouldReturnToken() {
+    void givenRequestWithAuthorizationHeader_whenResolveAccessToken_thenReturnToken() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader("Authorization", "Bearer validAccessToken");
 
@@ -113,14 +113,14 @@ class JwtProviderTest {
 
     @Test
     @DisplayName("요청에서 Access Token 추출 - 누락된 헤더 시 TokenMissingException 발생")
-    void resolveAccessTokenWithMissingHeaderShouldThrowTokenMissingException() {
+    void givenRequestWithoutAuthorizationHeader_whenResolveAccessToken_thenThrowTokenMissingException() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         assertThrows(TokenMissingException.class, () -> jwtProvider.resolveAccessToken(request));
     }
 
     @Test
     @DisplayName("요청에서 Refresh Token 추출 - 유효한 헤더")
-    void resolveRefreshTokenWithValidHeaderShouldReturnToken() {
+    void givenRequestWithRefreshTokenHeader_whenResolveRefreshToken_thenReturnToken() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader("Refresh-Token", "validRefreshToken");
 
@@ -130,7 +130,7 @@ class JwtProviderTest {
 
     @Test
     @DisplayName("요청에서 Refresh Token 추출 - 누락된 헤더 시 TokenMissingException 발생")
-    void resolveRefreshTokenWithMissingHeaderShouldThrowTokenMissingException() {
+    void givenRequestWithoutRefreshTokenHeader_whenResolveRefreshToken_thenThrowTokenMissingException() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         assertThrows(TokenMissingException.class, () -> jwtProvider.resolveRefreshToken(request));
     }

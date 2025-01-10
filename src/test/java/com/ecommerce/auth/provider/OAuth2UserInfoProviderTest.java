@@ -7,7 +7,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
@@ -21,7 +20,7 @@ class OAuth2UserInfoProviderTest {
 
     @Test
     @DisplayName("Google 프로바이더에 대해 GoogleUserInfo 반환")
-    void getOAuth2UserInfo_ShouldReturnGoogleUserInfo_ForGoogleProvider() {
+    void givenGoogleProvider_whenGetOAuth2UserInfo_thenReturnGoogleUserInfo() {
         // Given
         String providerName = "google";
 
@@ -34,7 +33,7 @@ class OAuth2UserInfoProviderTest {
 
     @Test
     @DisplayName("지원되지 않는 프로바이더에 대해 null 반환")
-    void getOAuth2UserInfo_ShouldReturnNull_ForUnsupportedProvider() {
+    void givenUnsupportedProvider_whenGetOAuth2UserInfo_thenReturnNull() {
         // Given
         String providerName = "unsupported";
 

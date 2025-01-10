@@ -76,7 +76,7 @@ class CustomAuthenticationSuccessHandlerTest {
 
     @Test
     @DisplayName("Temp User 로그인 성공 - Redis에 저장 및 Temp Token 반환")
-    void onAuthenticationSuccessWithTempUserShouldSaveToRedisAndReturnTempToken() throws IOException {
+    void givenTempUser_whenOnAuthenticationSuccess_thenSaveToRedisAndReturnTempToken() throws IOException {
         // Given
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -108,7 +108,7 @@ class CustomAuthenticationSuccessHandlerTest {
 
     @Test
     @DisplayName("일반 User 로그인 성공 - AccessToken과 RefreshToken 반환")
-    void onAuthenticationSuccessWithNormalUserShouldReturnAccessAndRefreshTokens() throws IOException {
+    void givenNormalUser_whenOnAuthenticationSuccess_thenReturnAccessAndRefreshTokens() throws IOException {
         // Given
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
