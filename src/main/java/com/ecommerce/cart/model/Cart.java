@@ -1,7 +1,5 @@
 package com.ecommerce.cart.model;
 
-import com.ecommerce.user.model.User;
-
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
