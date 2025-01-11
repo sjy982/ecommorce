@@ -33,8 +33,8 @@ class RefreshTokenRedisServiceTest {
     private final Duration timeoutDuration = Duration.ofDays(30);
 
     @Test
-    @DisplayName("저장 - Redis에 값을 저장해야 한다")
-    void save_ShouldStoreValueInRedis() {
+    @DisplayName("Redis에 값을 저장해야 한다")
+    void givenKeyAndValue_whenSaveCalled_thenShouldStoreValueInRedis() {
         // Given
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
@@ -47,8 +47,8 @@ class RefreshTokenRedisServiceTest {
     }
 
     @Test
-    @DisplayName("조회 - Redis에서 저장된 값을 반환해야 한다")
-    void get_ShouldReturnValueFromRedis() {
+    @DisplayName("Redis에서 저장된 값을 반환해야 한다")
+    void givenKey_whenGetCalled_thenShouldReturnValueFromRedis() {
         // Given
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get(prefix + testKey)).thenReturn(testValue);
@@ -62,8 +62,8 @@ class RefreshTokenRedisServiceTest {
     }
 
     @Test
-    @DisplayName("삭제 - Redis에서 값을 삭제해야 한다")
-    void delete_ShouldRemoveValueFromRedis() {
+    @DisplayName("Redis에서 값을 삭제해야 한다")
+    void givenKey_whenDeleteCalled_thenShouldRemoveValueFromRedis() {
         // When
         refreshTokenRedisService.delete(testKey);
 

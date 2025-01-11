@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ecommerce.auth.jwt.JwtProvider;
+import com.ecommerce.cart.model.Cart;
 import com.ecommerce.user.Dto.RegisterUserRequestDto;
 import com.ecommerce.user.Dto.RegisterUserResponseDto;
 import com.ecommerce.user.Dto.TokenResponseDto;
@@ -18,17 +19,17 @@ public class UserService {
     private final RefreshTokenRedisService refreshTokenRedisService;
     private final JwtProvider jwtProvider;
     private final UserRedisService userRedisService;
-    private final UserRepository inMemoryUserRepository;
+    private final UserRepository userRepository;
 
     @Autowired
     public UserService(RefreshTokenRedisService refreshTokenRedisService,
                        JwtProvider jwtProvider,
                        UserRedisService userRedisService,
-                       UserRepository inMemoryUserRepository) {
+                       UserRepository userRepository) {
         this.refreshTokenRedisService = refreshTokenRedisService;
         this.jwtProvider = jwtProvider;
         this.userRedisService = userRedisService;
-        this.inMemoryUserRepository = inMemoryUserRepository;
+        this.userRepository = userRepository;
     }
 
     public RegisterUserResponseDto registerUser(String providerId, RegisterUserRequestDto registerUserRequestDto) {
@@ -38,12 +39,13 @@ public class UserService {
         }
         user.setPhone(registerUserRequestDto.getPhone());
         user.setAddress(registerUserRequestDto.getAddress());
-        user.setRole(UserRole.USER);
+        Cart cart = new Cart();
+        user.setCart(cart);
 
-        inMemoryUserRepository.save(user);
+        userRepository.save(user);
         userRedisService.delete(providerId);
 
-        String accessToken = jwtProvider.createAccessToken(providerId, user.getRole());
+        String accessToken = jwtProvider.createAccessToken(providerId, UserRole.USER);
         String refreshToken = jwtProvider.createRefreshToken(providerId);
 
         refreshTokenRedisService.save(providerId, refreshToken);

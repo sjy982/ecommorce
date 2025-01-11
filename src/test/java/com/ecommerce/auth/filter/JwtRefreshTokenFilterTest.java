@@ -30,7 +30,7 @@ class JwtRefreshTokenFilterTest {
 
     @Test
     @DisplayName("유효한 Refresh Token으로 필터 실행 시 'sub' 속성이 설정되고 필터 체인이 호출됨")
-    void doFilterInternalWithValidRefreshTokenShouldSetSubjectAttributeAndProceed() throws Exception {
+    void givenValidRefreshToken_whenDoFilterInternal_thenSetSubjectAttributeAndProceed() throws Exception {
         // Given: Mock Request, Response
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader("Refresh-Token", "validRefreshToken");

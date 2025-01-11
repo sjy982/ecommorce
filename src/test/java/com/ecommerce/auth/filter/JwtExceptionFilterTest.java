@@ -27,15 +27,16 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletResponse;
 
-
 @ExtendWith(MockitoExtension.class)
 class JwtExceptionFilterTest {
+
     private ObjectMapper objectMapper;
 
     @Mock
     private FilterChain filterChain;
 
     private JwtExceptionFilter jwtExceptionFilter;
+
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
@@ -46,7 +47,7 @@ class JwtExceptionFilterTest {
 
     @Test
     @DisplayName("JwtException 발생 시 401 Unauthorized 응답 반환")
-    void doFilterInternalWithJwtExceptionShouldReturnUnauthorizedResponse() throws Exception {
+    void givenJwtException_whenDoFilterInternal_thenReturnUnauthorizedResponse() throws Exception {
         // Given: Mock Request, Response, FilterChain
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -72,7 +73,7 @@ class JwtExceptionFilterTest {
 
     @Test
     @DisplayName("예외 없이 필터 체인을 정상적으로 통과")
-    void doFilterInternalWithoutExceptionShouldProceedToNextFilter() throws Exception {
+    void givenNoException_whenDoFilterInternal_thenProceedToNextFilter() throws Exception {
         // Given: Mock Request, Response, FilterChain
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
