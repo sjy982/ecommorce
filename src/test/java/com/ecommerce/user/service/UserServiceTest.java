@@ -1,6 +1,7 @@
 package com.ecommerce.user.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -35,14 +36,14 @@ class UserServiceTest {
     private UserRedisService userRedisService;
 
     @Mock
-    private UserRepository inMemoryUserRepository;
+    private UserRepository userRepository;
 
     @InjectMocks
     private UserService userService;
 
     @Test
-    @DisplayName("유효한 세션 데이터가 있으면 사용자 등록에 성공해야 한다")
-    void registerUser_ShouldRegisterUser_WhenValidSessionExists() {
+    @DisplayName("유효한 세션 데이터로 사용자 등록")
+    void givenValidSession_whenRegisterUser_thenShouldRegisterUserSuccessfully() {
         // Given
         String providerId = "provider123";
         String phone = "010-1234-5678";
@@ -63,14 +64,15 @@ class UserServiceTest {
         assertEquals("refresh-token", response.getRefreshToken());
         assertEquals(phone, response.getUser().getPhone());
         assertEquals(address, response.getUser().getAddress());
-        verify(inMemoryUserRepository, times(1)).save(user);
+        assertNotEquals(null, response.getUser().getCart());
+        verify(userRepository, times(1)).save(user);
         verify(userRedisService, times(1)).delete(providerId);
         verify(refreshTokenRedisService, times(1)).save(providerId, "refresh-token");
     }
 
     @Test
-    @DisplayName("세션 데이터가 만료되면 SessionExpiredException을 발생시켜야 한다")
-    void registerUser_ShouldThrowSessionExpiredException_WhenSessionIsExpired() {
+    @DisplayName("세션 데이터가 만료되어 사용자 등록 실패")
+    void givenExpiredSession_whenRegisterUser_thenShouldThrowSessionExpiredException() {
         // Given
         String providerId = "provider123";
         RegisterUserRequestDto requestDto = new RegisterUserRequestDto("010-1234-5678", "Test Address");
@@ -82,11 +84,11 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Refresh Token이 일치하면 새 토큰을 발급해야 한다")
-    void refreshTokens_ShouldIssueNewTokens_WhenRefreshTokenMatches() {
+    @DisplayName("유효한 Refresh Token으로 새 토큰 발급")
+    void givenValidRefreshToken_whenRefreshTokens_thenShouldIssueNewTokens() {
         // Given
         String providerId = "provider123";
-        String refreshToken = "invalid-refresh-token";
+        String refreshToken = "valid-refresh-token";
 
         when(refreshTokenRedisService.get(providerId)).thenReturn(refreshToken);
         when(jwtProvider.createAccessToken(providerId, UserRole.USER)).thenReturn("new-access-token");
@@ -102,8 +104,8 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Refresh Token이 불일치하면 RefreshTokenException을 발생시켜야 한다")
-    void refreshTokens_ShouldThrowRefreshTokenException_WhenRefreshTokenDoesNotMatch() {
+    @DisplayName("Refresh Token 불일치로 예외 발생")
+    void givenMismatchedRefreshToken_whenRefreshTokens_thenShouldThrowRefreshTokenException() {
         // Given
         String providerId = "provider123";
         String refreshToken = "invalid-refresh-token";
@@ -117,8 +119,8 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Store Refresh Token이 없다면 null이 반환됨 이때 RefreshTokenException을 발생시켜야 한다")
-    void refreshTokens_ShouldThrowRefreshTokenException_WhenStoredTokenIsNull() {
+    @DisplayName("저장된 Refresh Token이 없을 경우 예외 발생")
+    void givenNoStoredRefreshToken_whenRefreshTokens_thenShouldThrowRefreshTokenException() {
         // Given
         String providerId = "provider123";
         String refreshToken = "invalid-refresh-token";

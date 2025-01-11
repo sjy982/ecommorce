@@ -13,9 +13,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.ecommerce.config.TestConstants;
 import com.ecommerce.security.WithMockCustomUser;
 import com.ecommerce.user.Dto.RegisterUserRequestDto;
 import com.ecommerce.user.Dto.RegisterUserResponseDto;
@@ -25,6 +25,7 @@ import com.ecommerce.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
+@ActiveProfiles("test")
 @AutoConfigureMockMvc(addFilters = false)
 class UserControllerTest {
 
@@ -36,10 +37,11 @@ class UserControllerTest {
 
     @MockBean
     private UserService userService;
+
     @Test
     @DisplayName("새로운 사용자를 등록하고 올바른 응답을 반환해야 한다")
     @WithMockCustomUser(username = TEST_PROVIDER_ID, role = TEST_TEMP_ROLE)
-    void registerUser_ShouldReturnCreatedResponse() throws Exception {
+    void givenRegisterUserRequest_whenValidRequest_thenShouldReturnCreatedResponse() throws Exception {
         // Given
         RegisterUserRequestDto requestDto = new RegisterUserRequestDto();
         requestDto.setPhone("010-1234-5689");
@@ -66,7 +68,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("유효한 Refresh Token으로 새로운 Access Token과 Refresh Token을 반환해야 한다")
-    void refreshAccessToken_ShouldReturnNewTokens_WhenValidRefreshToken() throws Exception {
+    void givenValidRefreshToken_whenRefreshingTokens_thenShouldReturnNewTokens() throws Exception {
         // Given
         String refreshToken = "valid-refresh-token";
         String sub = "test-providerId";

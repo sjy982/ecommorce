@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import com.ecommerce.user.model.User;
+import com.ecommerce.user.model.UserRole;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -19,10 +20,12 @@ import lombok.extern.slf4j.Slf4j;
 public class CustomOAuth2UserDetails implements UserDetails, OAuth2User {
     private final User user;
     private final Map<String, Object> attributes;
+    private final UserRole role;
 
-    public CustomOAuth2UserDetails(User user, Map<String, Object> attributes) {
+    public CustomOAuth2UserDetails(User user, Map<String, Object> attributes, UserRole role) {
         this.user = user;
         this.attributes = attributes;
+        this.role = role;
     }
     @Override
     public String getName() {
@@ -37,7 +40,7 @@ public class CustomOAuth2UserDetails implements UserDetails, OAuth2User {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority(user.getRole().name()));
+        authorities.add(new SimpleGrantedAuthority(role.name()));
         return authorities;
     }
 

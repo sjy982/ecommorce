@@ -38,7 +38,7 @@ class JwtAuthenticationFilterTest {
 
     @Test
     @DisplayName("유효한 Access Token으로 인증 정보를 설정하고 다음 필터로 진행해야 한다")
-    void doFilterInternalWithValidTokenShouldSetAuthenticationAndProceed() throws Exception {
+    void givenValidAccessToken_whenDoFilterInternal_thenSetAuthenticationAndProceed() throws Exception {
         // Given: 유효한 JWT 설정
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader("Authorization", "Bearer validToken"); // Authorization 헤더 추가

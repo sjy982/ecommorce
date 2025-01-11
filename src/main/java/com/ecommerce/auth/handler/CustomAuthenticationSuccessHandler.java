@@ -1,10 +1,6 @@
 package com.ecommerce.auth.handler;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -16,6 +12,7 @@ import com.ecommerce.auth.model.CustomOAuth2UserDetails;
 import com.ecommerce.common.response.ApiResponseUtil;
 import com.ecommerce.user.model.User;
 import com.ecommerce.user.model.UserRole;
+import com.ecommerce.user.service.RefreshTokenRedisService;
 import com.ecommerce.user.service.UserRedisService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -31,6 +28,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     private final JwtProvider jwtTokenProvider;
     private final ObjectMapper mapper;
     private final UserRedisService userRedisService;
+    private final RefreshTokenRedisService refreshTokenRedisService;
     private final AuthenticationSuccessResponseDto authenticationSuccessResponseDto;
 
     @Override
@@ -38,7 +36,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
                                         Authentication authentication) throws IOException {
         CustomOAuth2UserDetails userDetails = (CustomOAuth2UserDetails) authentication.getPrincipal();
         User user = userDetails.getUser();
-        if(user.getRole().name().equals(UserRole.TEMP.name())) {
+        if(userDetails.getRole().name().equals(UserRole.TEMP.name())) {
             String providerId = user.getProviderId();
             userRedisService.save(providerId, user);
 
@@ -49,8 +47,9 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
                     ApiResponseUtil.createResponse(HttpServletResponse.SC_OK, authenticationSuccessResponseDto, "Please enter additional information"))
             );
         } else {
-            String accessToken = jwtTokenProvider.createAccessToken(user.getProviderId(), user.getRole());
+            String accessToken = jwtTokenProvider.createAccessToken(user.getProviderId(), userDetails.getRole());
             String refreshToken = jwtTokenProvider.createRefreshToken(user.getProviderId());
+            refreshTokenRedisService.save(user.getProviderId(), refreshToken);
             response.setHeader("Authorization", "Bearer " + accessToken);
             response.setHeader("Refresh-Token", refreshToken);
             response.getWriter().write(mapper.writeValueAsString(

@@ -1,5 +1,7 @@
 package com.ecommerce.auth.service;
 
+import java.util.Optional;
+
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -20,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Service
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
-    private final UserRepository userInMemoryRepository;
+    private final UserRepository userRepository;
     private final OAuth2UserInfoProvider oAuth2UserInfoProvider;
     private final DefaultOAuth2UserService delegate;
 
@@ -41,19 +43,24 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         String providerId = provider + "_" + subject;
 
-        User user = userInMemoryRepository.findByLoginId(providerId);
-        if(user == null) {
+        Optional<User> optionalUser = userRepository.findByProviderId(providerId);
+        User user;
+        UserRole role = UserRole.USER;
+        if(optionalUser.isEmpty()) {
             user = User.builder()
-                    .provider(provider)
-                    .subject(subject)
-                    .email(email)
-                    .name(name)
-                    .providerId(providerId)
-                    .role(UserRole.TEMP)
-                    .build();
+                        .provider(provider)
+                        .subject(subject)
+                        .email(email)
+                        .name(name)
+                        .providerId(providerId)
+                        .build();
+
+            role = UserRole.TEMP;
+        } else {
+            user = optionalUser.get();
         }
         log.info(String.valueOf(user));
 
-        return new CustomOAuth2UserDetails(user, oAuth2User.getAttributes());
+        return new CustomOAuth2UserDetails(user, oAuth2User.getAttributes(), role);
     }
 }
