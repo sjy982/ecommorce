@@ -15,9 +15,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.ecommerce.auth.jwt.JwtProvider;
-import com.ecommerce.user.Dto.RegisterUserRequestDto;
-import com.ecommerce.user.Dto.RegisterUserResponseDto;
-import com.ecommerce.user.Dto.TokenResponseDto;
+import com.ecommerce.user.DTO.RegisterUserRequestDto;
+import com.ecommerce.user.DTO.RegisterUserResponseDto;
+import com.ecommerce.user.DTO.TokenResponseDto;
 import com.ecommerce.user.Exception.RefreshTokenException;
 import com.ecommerce.user.Exception.SessionExpiredException;
 import com.ecommerce.user.model.User;
@@ -53,8 +53,8 @@ class UserServiceTest {
         user.setProviderId(providerId);
 
         when(userRedisService.get(providerId)).thenReturn(user);
-        when(jwtProvider.createAccessToken(providerId, UserRole.USER)).thenReturn("access-token");
-        when(jwtProvider.createRefreshToken(providerId)).thenReturn("refresh-token");
+        when(jwtProvider.createAccessToken(providerId, UserRole.USER.name())).thenReturn("access-token");
+        when(jwtProvider.createRefreshToken(providerId, UserRole.USER.name())).thenReturn("refresh-token");
 
         // When
         RegisterUserResponseDto response = userService.registerUser(providerId, requestDto);
@@ -91,11 +91,11 @@ class UserServiceTest {
         String refreshToken = "valid-refresh-token";
 
         when(refreshTokenRedisService.get(providerId)).thenReturn(refreshToken);
-        when(jwtProvider.createAccessToken(providerId, UserRole.USER)).thenReturn("new-access-token");
-        when(jwtProvider.createRefreshToken(providerId)).thenReturn("new-refresh-token");
+        when(jwtProvider.createAccessToken(providerId, UserRole.USER.name())).thenReturn("new-access-token");
+        when(jwtProvider.createRefreshToken(providerId, UserRole.USER.name())).thenReturn("new-refresh-token");
 
         // When
-        TokenResponseDto response = userService.refreshTokens(providerId, refreshToken);
+        TokenResponseDto response = userService.refreshTokens(providerId, UserRole.USER.name(), refreshToken);
 
         // Then
         assertEquals("new-access-token", response.getAccessToken());
@@ -114,7 +114,7 @@ class UserServiceTest {
         when(refreshTokenRedisService.get(providerId)).thenReturn(storedRefreshToken);
 
         // When & Then
-        assertThrows(RefreshTokenException.class, () -> userService.refreshTokens(providerId, refreshToken));
+        assertThrows(RefreshTokenException.class, () -> userService.refreshTokens(providerId, UserRole.USER.name(), refreshToken));
         verify(refreshTokenRedisService, times(1)).delete(providerId);
     }
 
@@ -128,6 +128,6 @@ class UserServiceTest {
         when(refreshTokenRedisService.get(providerId)).thenReturn(null);
 
         // When & Then
-        assertThrows(RefreshTokenException.class, () -> userService.refreshTokens(providerId, refreshToken));
+        assertThrows(RefreshTokenException.class, () -> userService.refreshTokens(providerId, UserRole.USER.name(), refreshToken));
     }
 }

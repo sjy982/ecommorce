@@ -13,10 +13,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ecommerce.common.response.ApiResponse;
 import com.ecommerce.common.response.ApiResponseUtil;
-import com.ecommerce.user.Dto.RegisterUserRequestDto;
-import com.ecommerce.user.Dto.RegisterUserResponseDto;
-import com.ecommerce.user.Dto.TokenResponseDto;
+import com.ecommerce.user.DTO.RegisterUserRequestDto;
+import com.ecommerce.user.DTO.RegisterUserResponseDto;
+import com.ecommerce.user.DTO.TokenResponseDto;
+import com.ecommerce.user.model.User;
 import com.ecommerce.user.service.UserService;
 
 import jakarta.validation.Valid;
@@ -30,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UserController {
     private final UserService userService;
     @PostMapping
-    public ResponseEntity<?> registerUser(@RequestBody @Valid RegisterUserRequestDto dto) {
+    public ResponseEntity<ApiResponse<User>> registerUser(@RequestBody @Valid RegisterUserRequestDto dto) {
         String providerId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         RegisterUserResponseDto registerUserResponseDto = userService.registerUser(providerId, dto);
         return ResponseEntity
@@ -41,9 +43,10 @@ public class UserController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshAccessToken(@RequestHeader("Refresh-Token") String refreshToken,
-                                                @RequestAttribute("sub") String sub) {
-        TokenResponseDto tokens = userService.refreshTokens(sub, refreshToken);
+    public ResponseEntity<ApiResponse<Void>> refreshAccessToken(@RequestHeader("Refresh-Token") String refreshToken,
+                                                                @RequestAttribute("sub") String sub,
+                                                                @RequestAttribute("role") String role) {
+        TokenResponseDto tokens = userService.refreshTokens(sub, role, refreshToken);
         return ResponseEntity.
                 status(HttpStatus.CREATED)
                 .header("Authorization", "Bearer " + tokens.getAccessToken())

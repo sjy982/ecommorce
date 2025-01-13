@@ -36,7 +36,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
                                         Authentication authentication) throws IOException {
         CustomOAuth2UserDetails userDetails = (CustomOAuth2UserDetails) authentication.getPrincipal();
         User user = userDetails.getUser();
-        if(userDetails.getRole().name().equals(UserRole.TEMP.name())) {
+        if(userDetails.getRole().equals(UserRole.TEMP.name())) {
             String providerId = user.getProviderId();
             userRedisService.save(providerId, user);
 
@@ -48,7 +48,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
             );
         } else {
             String accessToken = jwtTokenProvider.createAccessToken(user.getProviderId(), userDetails.getRole());
-            String refreshToken = jwtTokenProvider.createRefreshToken(user.getProviderId());
+            String refreshToken = jwtTokenProvider.createRefreshToken(user.getProviderId(), userDetails.getRole());
             refreshTokenRedisService.save(user.getProviderId(), refreshToken);
             response.setHeader("Authorization", "Bearer " + accessToken);
             response.setHeader("Refresh-Token", refreshToken);
