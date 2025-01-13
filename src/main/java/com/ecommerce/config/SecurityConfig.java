@@ -8,8 +8,13 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatchers;
 
 import com.ecommerce.auth.filter.JwtAuthenticationFilter;
 import com.ecommerce.auth.filter.JwtExceptionFilter;
@@ -19,15 +24,19 @@ import com.ecommerce.auth.jwt.JwtProvider;
 import com.ecommerce.auth.service.CustomOAuth2UserService;
 import com.ecommerce.user.model.UserRole;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig  {
-    private static final String[] JWT_PATH = {"/api/**"};
-    private static final String[] OAUTH2_PATH = {"/api/auth/login/**", "/oauth2/**", "/login/**"};
+    private static final String[] OAUTH2_PATHS = {"/api/auth/login/**", "/oauth2/**", "/login/**"};
+    private static final RequestMatcher PUBLIC_PATHS = RequestMatchers.anyOf(
+            new AntPathRequestMatcher("/api/store", HttpMethod.POST.name()),
+            new AntPathRequestMatcher("/api/store/login", HttpMethod.POST.name())
+    );
+    private static final String RT_PATH = "/api/users/refresh";
+    private static final String JWT_PATH = "/api/**";
 
     private final ObjectMapper objectMapper;
 
@@ -36,6 +45,11 @@ public class SecurityConfig  {
     private final CustomAuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
 
     private final CustomOAuth2UserService customOAuth2UserService;
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     private static void applyCommonSettings(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
@@ -46,7 +60,7 @@ public class SecurityConfig  {
     @Order(1)
     public SecurityFilterChain oauthFilterChain(HttpSecurity http) throws Exception {
         applyCommonSettings(http);
-        http.securityMatcher(OAUTH2_PATH)
+        http.securityMatcher(OAUTH2_PATHS)
             .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
             .oauth2Login(oauth2 -> oauth2
                     .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
@@ -58,7 +72,7 @@ public class SecurityConfig  {
     @Order(2)
     public SecurityFilterChain refreshTokenFilterChain(HttpSecurity http) throws Exception {
         applyCommonSettings(http);
-        http.securityMatcher("/api/users/refresh")
+        http.securityMatcher(RT_PATH)
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll())
                 .addFilterBefore(new JwtRefreshTokenFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
@@ -68,6 +82,16 @@ public class SecurityConfig  {
 
     @Bean
     @Order(3)
+    public SecurityFilterChain publicFilterChain(HttpSecurity http) throws Exception {
+        applyCommonSettings(http);
+        http.securityMatcher(PUBLIC_PATHS)
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll());
+        return http.build();
+    }
+
+    @Bean
+    @Order(4)
     public SecurityFilterChain jwtFilterChain(HttpSecurity http) throws Exception {
         applyCommonSettings(http);
         http.securityMatcher(JWT_PATH)

@@ -72,7 +72,7 @@ class CustomOAuth2UserServiceTest {
 
         // Then
         assertEquals(providerId, result.getUser().getProviderId());
-        assertEquals(UserRole.TEMP, result.getRole());
+        assertEquals(UserRole.TEMP.name(), result.getRole());
         assertEquals(email, result.getUser().getEmail());
         assertEquals(name, result.getUser().getName());
         verify(userRepository, times(1)).findByProviderId(providerId);
@@ -108,7 +108,7 @@ class CustomOAuth2UserServiceTest {
 
         // Then
         assertEquals(providerId, result.getUser().getProviderId());
-        assertEquals(UserRole.USER, result.getRole());
+        assertEquals(UserRole.USER.name(), result.getRole());
         assertEquals(email, result.getUser().getEmail());
         assertEquals(name, result.getUser().getName());
         verify(userRepository, times(1)).findByProviderId(providerId);

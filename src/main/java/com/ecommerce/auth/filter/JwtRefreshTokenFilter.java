@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.ecommerce.auth.jwt.JwtProvider;
+import com.ecommerce.user.model.UserRole;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -25,7 +26,10 @@ public class JwtRefreshTokenFilter extends OncePerRequestFilter {
 
         jwtProvider.validateRefreshToken(refreshToken);
         String subject = jwtProvider.getSubjectFromRefreshToken(refreshToken);
+        String role = jwtProvider.getRoleFromRefreshToken(refreshToken);
+
         request.setAttribute("sub", subject);
+        request.setAttribute("role", role);
         filterChain.doFilter(request, response);
     }
 }

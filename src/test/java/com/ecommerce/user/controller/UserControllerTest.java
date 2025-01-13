@@ -17,10 +17,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.ecommerce.security.WithMockCustomUser;
-import com.ecommerce.user.Dto.RegisterUserRequestDto;
-import com.ecommerce.user.Dto.RegisterUserResponseDto;
-import com.ecommerce.user.Dto.TokenResponseDto;
+import com.ecommerce.user.DTO.RegisterUserRequestDto;
+import com.ecommerce.user.DTO.RegisterUserResponseDto;
+import com.ecommerce.user.DTO.TokenResponseDto;
 import com.ecommerce.user.model.User;
+import com.ecommerce.user.model.UserRole;
 import com.ecommerce.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -76,12 +77,13 @@ class UserControllerTest {
         TokenResponseDto tokenResponse = new TokenResponseDto("new-access-token", "new-refresh-token");
 
         // Mock 설정
-        when(userService.refreshTokens(sub, refreshToken)).thenReturn(tokenResponse);
+        when(userService.refreshTokens(sub, UserRole.USER.name(), refreshToken)).thenReturn(tokenResponse);
 
         // When & Then
         mockMvc.perform(post("/api/users/refresh")
                                 .header("Refresh-Token", refreshToken)
-                                .requestAttr("sub", sub))
+                                .requestAttr("sub", sub)
+                                .requestAttr("role", UserRole.USER.name()))
                .andExpect(status().isCreated())
                .andExpect(header().string("Authorization", "Bearer new-access-token"))
                .andExpect(header().string("Refresh-Token", "new-refresh-token"))

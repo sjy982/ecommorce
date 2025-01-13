@@ -20,9 +20,9 @@ import lombok.extern.slf4j.Slf4j;
 public class CustomOAuth2UserDetails implements UserDetails, OAuth2User {
     private final User user;
     private final Map<String, Object> attributes;
-    private final UserRole role;
+    private final String role;
 
-    public CustomOAuth2UserDetails(User user, Map<String, Object> attributes, UserRole role) {
+    public CustomOAuth2UserDetails(User user, Map<String, Object> attributes, String role) {
         this.user = user;
         this.attributes = attributes;
         this.role = role;
@@ -40,7 +40,7 @@ public class CustomOAuth2UserDetails implements UserDetails, OAuth2User {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority(role.name()));
+        authorities.add(new SimpleGrantedAuthority(role));
         return authorities;
     }
 

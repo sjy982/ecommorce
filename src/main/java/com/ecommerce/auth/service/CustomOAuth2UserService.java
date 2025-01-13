@@ -45,7 +45,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         Optional<User> optionalUser = userRepository.findByProviderId(providerId);
         User user;
-        UserRole role = UserRole.USER;
+        String role = UserRole.USER.name();
         if(optionalUser.isEmpty()) {
             user = User.builder()
                         .provider(provider)
@@ -55,7 +55,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                         .providerId(providerId)
                         .build();
 
-            role = UserRole.TEMP;
+            role = UserRole.TEMP.name();
         } else {
             user = optionalUser.get();
         }
