@@ -26,7 +26,7 @@ class CustomOAuth2UserDetailsTest {
     @DisplayName("사용자의 권한을 올바르게 반환해야 한다")
     void givenCustomOAuth2UserDetails_whenGetAuthorities_thenReturnCorrectUserRole() {
         // Given
-        CustomOAuth2UserDetails userDetails = new CustomOAuth2UserDetails(mockUser, Map.of(), UserRole.USER);
+        CustomOAuth2UserDetails userDetails = new CustomOAuth2UserDetails(mockUser, Map.of(), UserRole.USER.name());
 
         // When
         GrantedAuthority authority = userDetails.getAuthorities().iterator().next();
@@ -40,7 +40,7 @@ class CustomOAuth2UserDetailsTest {
     void givenCustomOAuth2UserDetails_whenGetUsername_thenReturnCorrectProviderId() {
         // Given
         when(mockUser.getProviderId()).thenReturn("provider123");
-        CustomOAuth2UserDetails userDetails = new CustomOAuth2UserDetails(mockUser, Map.of(), UserRole.USER);
+        CustomOAuth2UserDetails userDetails = new CustomOAuth2UserDetails(mockUser, Map.of(), UserRole.USER.name());
 
         // When
         String username = userDetails.getUsername();
@@ -53,7 +53,7 @@ class CustomOAuth2UserDetailsTest {
     @DisplayName("계정 상태가 항상 유효해야 한다")
     void givenCustomOAuth2UserDetails_whenCheckAccountState_thenReturnAlwaysValid() {
         // Given
-        CustomOAuth2UserDetails userDetails = new CustomOAuth2UserDetails(mockUser, Map.of(), UserRole.USER);
+        CustomOAuth2UserDetails userDetails = new CustomOAuth2UserDetails(mockUser, Map.of(), UserRole.USER.name());
 
         // Then
         assertTrue(userDetails.isAccountNonExpired());

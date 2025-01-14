@@ -5,9 +5,9 @@ import org.springframework.stereotype.Service;
 
 import com.ecommerce.auth.jwt.JwtProvider;
 import com.ecommerce.cart.model.Cart;
-import com.ecommerce.user.Dto.RegisterUserRequestDto;
-import com.ecommerce.user.Dto.RegisterUserResponseDto;
-import com.ecommerce.user.Dto.TokenResponseDto;
+import com.ecommerce.user.DTO.RegisterUserRequestDto;
+import com.ecommerce.user.DTO.RegisterUserResponseDto;
+import com.ecommerce.user.DTO.TokenResponseDto;
 import com.ecommerce.user.Exception.RefreshTokenException;
 import com.ecommerce.user.Exception.SessionExpiredException;
 import com.ecommerce.user.model.User;
@@ -45,25 +45,25 @@ public class UserService {
         userRepository.save(user);
         userRedisService.delete(providerId);
 
-        String accessToken = jwtProvider.createAccessToken(providerId, UserRole.USER);
-        String refreshToken = jwtProvider.createRefreshToken(providerId);
+        String accessToken = jwtProvider.createAccessToken(providerId, UserRole.USER.name());
+        String refreshToken = jwtProvider.createRefreshToken(providerId, UserRole.USER.name());
 
         refreshTokenRedisService.save(providerId, refreshToken);
         return new RegisterUserResponseDto(user, accessToken, refreshToken);
     }
 
-    public TokenResponseDto refreshTokens(String providerId, String refreshToken) {
-        String redisRefreshToken = refreshTokenRedisService.get(providerId);
+    public TokenResponseDto refreshTokens(String sub, String role, String refreshToken) {
+        String redisRefreshToken = refreshTokenRedisService.get(sub);
         if(!refreshToken.equals(redisRefreshToken)) {
             if(redisRefreshToken != null) {
-                refreshTokenRedisService.delete(providerId);
+                refreshTokenRedisService.delete(sub);
             }
             throw new RefreshTokenException("Refresh Token mismatch or expired");
         }
-        String newAccessToken = jwtProvider.createAccessToken(providerId, UserRole.USER);
-        String newRefreshToken = jwtProvider.createRefreshToken(providerId);
+        String newAccessToken = jwtProvider.createAccessToken(sub, role);
+        String newRefreshToken = jwtProvider.createRefreshToken(sub, role);
 
-        refreshTokenRedisService.save(providerId, newRefreshToken);
+        refreshTokenRedisService.save(sub, newRefreshToken);
 
         return new TokenResponseDto(newAccessToken, newRefreshToken);
     }

@@ -50,7 +50,7 @@ class JwtAuthenticationFilterTest {
         when(jwtProvider.resolveAccessToken(request)).thenReturn("validToken");
         when(jwtProvider.validateAccessToken("validToken")).thenReturn(true); // 토큰 검증 성공
         when(jwtProvider.getSubjectFromAccessToken("validToken")).thenReturn("user123");
-        when(jwtProvider.getRoleFromToken("validToken")).thenReturn("USER");
+        when(jwtProvider.getRoleFromAccessToken("validToken")).thenReturn("USER");
 
         // When: 필터 실행
         jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
