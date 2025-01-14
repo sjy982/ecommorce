@@ -18,8 +18,11 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.ecommerce.auth.exception.TokenInvalidException;
 import com.ecommerce.auth.jwt.JwtProvider;
-import com.ecommerce.user.Dto.RegisterUserRequestDto;
+import com.ecommerce.store.DTO.RegisterStoreRequestDto;
+import com.ecommerce.store.controller.StoreController;
+import com.ecommerce.user.DTO.RegisterUserRequestDto;
 import com.ecommerce.user.controller.UserController;
+import com.ecommerce.user.model.UserRole;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -36,6 +39,9 @@ class SecurityConfigTest {
     @MockBean
     private JwtProvider jwtProvider;
 
+    @MockBean
+    private StoreController storeController;
+
     @Test
     @DisplayName("OAuth2 경로 접근 시 인증이 필요하다")
     void givenUnauthenticatedUser_whenAccessingOAuth2Endpoint_thenRedirectToLogin() throws Exception {
@@ -45,19 +51,35 @@ class SecurityConfigTest {
     }
 
     @Test
-    @DisplayName("Refresh Token 경로는 인증 없이 접근 가능하다. 물론 올바른 Refresh Token이 필요하다.")
+    @DisplayName("Refresh Token 경로는 인증 없이 접근 가능하다. 물론 올바른 Refresh Token이 필요하며, 이를 검증한 필터가 올바르게 동작해야 한다.")
     void givenValidRefreshToken_whenAccessingRefreshTokenEndpoint_thenAllowAccess() throws Exception {
         // Given
         String refreshToken = "valid-refresh-token";
         when(jwtProvider.resolveRefreshToken(any(HttpServletRequest.class))).thenReturn(refreshToken);
         when(jwtProvider.validateRefreshToken(refreshToken)).thenReturn(true);
         when(jwtProvider.getSubjectFromRefreshToken(refreshToken)).thenReturn(TEST_PROVIDER_ID);
-        when(userController.refreshAccessToken(refreshToken, TEST_PROVIDER_ID))
+        when(jwtProvider.getRoleFromRefreshToken(refreshToken)).thenReturn(UserRole.USER.name());
+        when(userController.refreshAccessToken(refreshToken, UserRole.USER.name(), TEST_PROVIDER_ID))
                 .thenReturn(ResponseEntity.ok().build());
 
         // When & Then
         mockMvc.perform(post("/api/users/refresh")
                                 .header("Refresh-Token", refreshToken))
+               .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("public 경로는 인증 없이 접근 가능하다.")
+    void given_whenAccessingPublicPath_thenAllowAccess() throws Exception {
+       //Given
+        String requestBody = "{\"name\": \"testName\", \"password\": \"test pw\", \"phoneNumber\": \"010-1234-5678\"}";
+        when(storeController.registerStore(any(RegisterStoreRequestDto.class)))
+                .thenReturn(ResponseEntity.ok().build());
+
+        // When & Then
+        mockMvc.perform(post("/api/store")
+                                .contentType("application/json")
+                                .content(requestBody))
                .andExpect(status().isOk());
     }
 
@@ -84,7 +106,7 @@ class SecurityConfigTest {
         when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(accessToken);
         when(jwtProvider.validateAccessToken(accessToken)).thenReturn(true);
         when(jwtProvider.getSubjectFromAccessToken(accessToken)).thenReturn(TEST_PROVIDER_ID);
-        when(jwtProvider.getRoleFromToken(accessToken)).thenReturn("USER");
+        when(jwtProvider.getRoleFromAccessToken(accessToken)).thenReturn("USER");
 
         // When & Then
         mockMvc.perform(post("/api/users")
@@ -102,7 +124,7 @@ class SecurityConfigTest {
         when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(accessToken);
         when(jwtProvider.validateAccessToken(accessToken)).thenReturn(true);
         when(jwtProvider.getSubjectFromAccessToken(accessToken)).thenReturn(TEST_PROVIDER_ID);
-        when(jwtProvider.getRoleFromToken(accessToken)).thenReturn("TEMP");
+        when(jwtProvider.getRoleFromAccessToken(accessToken)).thenReturn("TEMP");
 
         when(userController.registerUser(any(RegisterUserRequestDto.class)))
                 .thenReturn(ResponseEntity.ok().build());

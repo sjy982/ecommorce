@@ -35,14 +35,14 @@ class JwtProviderTest {
     @Test
     @DisplayName("Access Token 생성 - 유효한 토큰 반환")
     void givenUserAndRole_whenCreateAccessToken_thenReturnValidToken() {
-        String token = jwtProvider.createAccessToken("user123", UserRole.USER);
+        String token = jwtProvider.createAccessToken("user123", UserRole.USER.name());
         assertNotNull(token, "Access Token은 null이어서는 안 됩니다.");
     }
 
     @Test
     @DisplayName("Refresh Token 생성 - 유효한 토큰 반환")
     void givenUser_whenCreateRefreshToken_thenReturnValidToken() {
-        String token = jwtProvider.createRefreshToken("user123");
+        String token = jwtProvider.createRefreshToken("user123", UserRole.USER.name());
         assertNotNull(token, "Refresh Token은 null이어서는 안 됩니다.");
     }
 
@@ -56,7 +56,7 @@ class JwtProviderTest {
     @Test
     @DisplayName("Access Token 검증 - 유효한 토큰이면 true 반환")
     void givenValidAccessToken_whenValidateAccessToken_thenReturnTrue() {
-        String token = jwtProvider.createAccessToken("user123", UserRole.USER);
+        String token = jwtProvider.createAccessToken("user123", UserRole.USER.name());
         assertTrue(jwtProvider.validateAccessToken(token), "유효한 Access Token은 true를 반환해야 합니다.");
     }
 
@@ -80,7 +80,7 @@ class JwtProviderTest {
     @Test
     @DisplayName("Access Token 검증 - 만료된 토큰 시 TokenExpiredException 발생")
     void givenExpiredAccessToken_whenValidateAccessToken_thenThrowTokenExpiredException() throws InterruptedException {
-        String token = jwtProvider.createAccessToken("user123", UserRole.USER);
+        String token = jwtProvider.createAccessToken("user123", UserRole.USER.name());
         TimeUnit.MILLISECONDS.sleep(2500); // 토큰 만료 대기 (2초 유효)
         assertThrows(TokenExpiredException.class, () -> jwtProvider.validateAccessToken(token));
     }
@@ -88,7 +88,7 @@ class JwtProviderTest {
     @Test
     @DisplayName("Access Token에서 Subject 추출")
     void givenAccessToken_whenGetSubjectFromAccessToken_thenReturnCorrectSubject() {
-        String token = jwtProvider.createAccessToken("user123", UserRole.USER);
+        String token = jwtProvider.createAccessToken("user123", UserRole.USER.name());
         String subject = jwtProvider.getSubjectFromAccessToken(token);
         assertEquals("user123", subject, "추출된 subject는 원본과 일치해야 합니다.");
     }
@@ -96,9 +96,13 @@ class JwtProviderTest {
     @Test
     @DisplayName("Access Token에서 Role 추출")
     void givenAccessToken_whenGetRoleFromToken_thenReturnCorrectRole() {
-        String token = jwtProvider.createAccessToken("user123", UserRole.USER);
-        String role = jwtProvider.getRoleFromToken(token);
+        String token = jwtProvider.createAccessToken("user123", UserRole.USER.name());
+        String role = jwtProvider.getRoleFromAccessToken(token);
+
+        String token2 = jwtProvider.createAccessToken("user234", UserRole.STORE.name());
+        String role2 = jwtProvider.getRoleFromAccessToken(token2);
         assertEquals("USER", role, "추출된 role은 원본과 일치해야 합니다.");
+        assertEquals("STORE", role2);
     }
 
     @Test

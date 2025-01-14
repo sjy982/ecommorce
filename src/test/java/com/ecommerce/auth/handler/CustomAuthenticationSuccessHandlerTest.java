@@ -86,7 +86,7 @@ class CustomAuthenticationSuccessHandlerTest {
 
         when(authentication.getPrincipal()).thenReturn(userDetails);
         when(userDetails.getUser()).thenReturn(tempUser);
-        when(userDetails.getRole()).thenReturn(UserRole.TEMP);
+        when(userDetails.getRole()).thenReturn(UserRole.TEMP.name());
         when(jwtProvider.createTempToken("provider123")).thenReturn("temp-token");
 
         // When
@@ -121,9 +121,9 @@ class CustomAuthenticationSuccessHandlerTest {
 
         when(authentication.getPrincipal()).thenReturn(userDetails);
         when(userDetails.getUser()).thenReturn(normalUser);
-        when(userDetails.getRole()).thenReturn(UserRole.USER);
-        when(jwtProvider.createAccessToken(providerId, UserRole.USER)).thenReturn(accessToken);
-        when(jwtProvider.createRefreshToken(providerId)).thenReturn(refreshToken);
+        when(userDetails.getRole()).thenReturn(UserRole.USER.name());
+        when(jwtProvider.createAccessToken(providerId, UserRole.USER.name())).thenReturn(accessToken);
+        when(jwtProvider.createRefreshToken(providerId, UserRole.USER.name())).thenReturn(refreshToken);
 
         // When
         successHandler.onAuthenticationSuccess(request, response, authentication);

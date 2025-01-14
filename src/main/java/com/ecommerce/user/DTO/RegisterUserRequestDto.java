@@ -1,4 +1,4 @@
-package com.ecommerce.user.Dto;
+package com.ecommerce.user.DTO;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

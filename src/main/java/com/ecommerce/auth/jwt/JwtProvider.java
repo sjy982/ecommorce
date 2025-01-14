@@ -49,17 +49,17 @@ public class JwtProvider {
     }
 
     public String createTempToken(String sub) {
-        return createToken(sub, UserRole.TEMP, tempValidityInMilliseconds, atSecretKey);
+        return createToken(sub, UserRole.TEMP.name(), tempValidityInMilliseconds, atSecretKey);
     }
 
-    public String createRefreshToken(String sub) {
-        return createToken(sub,  null, rtValidityInMilliseconds, rtSecretKey);
+    public String createRefreshToken(String sub, String role) {
+        return createToken(sub,  role, rtValidityInMilliseconds, rtSecretKey);
     }
-    public String createAccessToken(String sub, UserRole role) {
+    public String createAccessToken(String sub, String role) {
         return createToken(sub, role, validityInMilliseconds, atSecretKey);
     }
 
-    private String createToken(String sub, UserRole role, long validityInMilliseconds, SecretKey secretKey) {
+    private String createToken(String sub, String role, long validityInMilliseconds, SecretKey secretKey) {
         Date now = new Date();
         JwtBuilder builder = Jwts.builder()
                                  .setSubject(sub)
@@ -67,7 +67,7 @@ public class JwtProvider {
                                  .setExpiration(new Date(now.getTime() + validityInMilliseconds))
                                  .signWith(secretKey, SignatureAlgorithm.HS256);
         if(role != null) {
-            builder.claim("role", role.name());
+            builder.claim("role", role);
         }
         return builder.compact();
     }
@@ -109,8 +109,13 @@ public class JwtProvider {
         return claims.getSubject(); // subject 추출
     }
 
-    public String getRoleFromToken(String token) {
+    public String getRoleFromAccessToken(String token) {
         Claims claims = getClaims(token, atSecretKey);
+        return claims.get("role", String.class); // role 추출
+    }
+
+    public String getRoleFromRefreshToken(String token) {
+        Claims claims = getClaims(token, rtSecretKey);
         return claims.get("role", String.class); // role 추출
     }
 
