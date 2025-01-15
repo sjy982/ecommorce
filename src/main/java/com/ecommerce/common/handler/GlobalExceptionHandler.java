@@ -88,7 +88,7 @@ public class GlobalExceptionHandler {
         log.error("An error occurred: {}", ex.getMessage(), ex);
         HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         return ResponseEntity.status(httpStatus)
-                .body(ApiResponseUtil.createResponse(httpStatus.value(), ex.getMessage()));
+                .body(ApiResponseUtil.createResponse(httpStatus.value(), "server error"));
     }
 }
 

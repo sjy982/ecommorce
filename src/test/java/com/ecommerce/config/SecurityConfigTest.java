@@ -12,17 +12,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.ecommerce.auth.exception.TokenInvalidException;
 import com.ecommerce.auth.jwt.JwtProvider;
+import com.ecommerce.product.controller.ProductController;
+import com.ecommerce.product.dto.RegisterProductRequestDto;
 import com.ecommerce.store.DTO.RegisterStoreRequestDto;
 import com.ecommerce.store.controller.StoreController;
 import com.ecommerce.user.DTO.RegisterUserRequestDto;
 import com.ecommerce.user.controller.UserController;
 import com.ecommerce.user.model.UserRole;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -41,6 +45,12 @@ class SecurityConfigTest {
 
     @MockBean
     private StoreController storeController;
+
+    @MockBean
+    private ProductController productController;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     @DisplayName("OAuth2 경로 접근 시 인증이 필요하다")
@@ -133,6 +143,52 @@ class SecurityConfigTest {
         mockMvc.perform(post("/api/users")
                                 .header("Authorization", "Bearer " + accessToken)
                                 .contentType("application/json")
+                                .content(requestBody))
+               .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("STORE 권한이 없는 경우(ex USER 권한) /api/product에 접근할 수 없다.")
+    void givenUserRole_whenAccessingStoreEndpoint_thenInaccessible() throws Exception {
+        String accessToken = "valid-access-token";
+
+        when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(accessToken);
+        when(jwtProvider.validateAccessToken(accessToken)).thenReturn(true);
+        when(jwtProvider.getSubjectFromAccessToken(accessToken)).thenReturn(TEST_PROVIDER_ID);
+        when(jwtProvider.getRoleFromAccessToken(accessToken)).thenReturn("USER");
+
+        // When & Then
+        mockMvc.perform(post("/api/product")
+                                .header("Authorization", "Bearer " + accessToken))
+               .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("STORE 권한이 있는 경우(ex USER 권한) /api/product에 접근할 수 있다.")
+    void givenStoreRole_whenAccessingStoreEndpoint_thenAllowAccess() throws Exception {
+        // Given
+        String accessToken = "valid-access-token";
+
+        when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(accessToken);
+        when(jwtProvider.validateAccessToken(accessToken)).thenReturn(true);
+        when(jwtProvider.getSubjectFromAccessToken(accessToken)).thenReturn(TEST_PROVIDER_ID);
+        when(jwtProvider.getRoleFromAccessToken(accessToken)).thenReturn("STORE");
+
+        when(productController.registerProduct(any(RegisterProductRequestDto.class)))
+                .thenReturn(ResponseEntity.ok().build());
+
+        RegisterProductRequestDto requestDto = RegisterProductRequestDto.builder()
+                                                                        .categoryId(1)
+                                                                        .stock(10)
+                                                                        .price(100)
+                                                                        .name("test")
+                                                                        .description("test")
+                                                                        .build();
+        String requestBody = objectMapper.writeValueAsString(requestDto);
+        // When & Then
+        mockMvc.perform(post("/api/product")
+                                .header("Authorization", "Bearer " + accessToken)
+                                .contentType(MediaType.APPLICATION_JSON)
                                 .content(requestBody))
                .andExpect(status().isOk());
     }
