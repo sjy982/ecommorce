@@ -8,6 +8,5 @@ import com.ecommerce.store.model.Store;
 
 public interface StoreRepository extends JpaRepository<Store, Integer> {
     Optional<Store> findByName(String name);
-
     boolean existsByName(String name);
 }
