@@ -98,6 +98,7 @@ public class SecurityConfig  {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "api/users").hasRole(UserRole.TEMP.name())
                         .requestMatchers("api/admin/**").hasRole(UserRole.ADMIN.name())
+                        .requestMatchers(HttpMethod.POST, "api/product").hasRole(UserRole.STORE.name())
                         .anyRequest().permitAll())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JwtExceptionFilter(objectMapper), JwtAuthenticationFilter.class);
