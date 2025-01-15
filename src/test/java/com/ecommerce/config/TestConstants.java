@@ -5,4 +5,6 @@ public class TestConstants {
     public static final String TEST_TEMP_ROLE = "TEMP";
     public static final String TEST_USER_ROLE = "USER";
     public static final String TEST_ADMIN_ROLE = "ADMIN";
+
+    public static final String TEST_STORE_ROLE = "STORE";
 }
