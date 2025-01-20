@@ -23,7 +23,7 @@ import com.ecommerce.auth.jwt.JwtProvider;
 import com.ecommerce.auth.model.CustomOAuth2UserDetails;
 import com.ecommerce.common.response.ApiResponse;
 import com.ecommerce.common.response.ApiResponseUtil;
-import com.ecommerce.user.model.User;
+import com.ecommerce.user.model.Users;
 import com.ecommerce.user.model.UserRole;
 import com.ecommerce.user.service.RefreshTokenRedisService;
 import com.ecommerce.user.service.UserRedisService;
@@ -81,7 +81,7 @@ class CustomAuthenticationSuccessHandlerTest {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        User tempUser = new User();
+        Users tempUser = new Users();
         tempUser.setProviderId("provider123");
 
         when(authentication.getPrincipal()).thenReturn(userDetails);
@@ -116,7 +116,7 @@ class CustomAuthenticationSuccessHandlerTest {
         String providerId = "provider123";
         String accessToken = "access-token";
         String refreshToken = "refresh-token";
-        User normalUser = new User();
+        Users normalUser = new Users();
         normalUser.setProviderId(providerId);
 
         when(authentication.getPrincipal()).thenReturn(userDetails);

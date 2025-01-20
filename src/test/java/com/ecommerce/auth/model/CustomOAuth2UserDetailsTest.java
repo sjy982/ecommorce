@@ -13,14 +13,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.GrantedAuthority;
 
-import com.ecommerce.user.model.User;
+import com.ecommerce.user.model.Users;
 import com.ecommerce.user.model.UserRole;
 
 @ExtendWith(MockitoExtension.class)
 class CustomOAuth2UserDetailsTest {
 
     @Mock
-    private User mockUser;
+    private Users mockUser;
 
     @Test
     @DisplayName("사용자의 권한을 올바르게 반환해야 한다")

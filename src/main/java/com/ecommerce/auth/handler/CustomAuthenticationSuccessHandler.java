@@ -10,7 +10,7 @@ import com.ecommerce.auth.Dto.AuthenticationSuccessResponseDto;
 import com.ecommerce.auth.jwt.JwtProvider;
 import com.ecommerce.auth.model.CustomOAuth2UserDetails;
 import com.ecommerce.common.response.ApiResponseUtil;
-import com.ecommerce.user.model.User;
+import com.ecommerce.user.model.Users;
 import com.ecommerce.user.model.UserRole;
 import com.ecommerce.user.service.RefreshTokenRedisService;
 import com.ecommerce.user.service.UserRedisService;
@@ -35,7 +35,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
         CustomOAuth2UserDetails userDetails = (CustomOAuth2UserDetails) authentication.getPrincipal();
-        User user = userDetails.getUser();
+        Users user = userDetails.getUser();
         if(userDetails.getRole().equals(UserRole.TEMP.name())) {
             String providerId = user.getProviderId();
             userRedisService.save(providerId, user);

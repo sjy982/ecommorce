@@ -2,7 +2,6 @@ package com.ecommerce.product.service;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
 import com.ecommerce.category.model.Category;
 import com.ecommerce.category.repository.CategoryRepository;
 import com.ecommerce.product.dto.RegisterProductRequestDto;
@@ -39,5 +38,23 @@ public class ProductService {
 
         productRepository.save(newProduct);
         return new RegisterProductResponseDto(storeName, newProduct.getName(), newProduct.getPrice(), newProduct.getStock(), newProduct.getDescription(), category.getName());
+    }
+
+    public Product findById(long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("product not found"));
+        return product;
+    }
+
+    public Product decreaseStock(long id, int quantity) {
+        Product product = findById(id);
+
+        if(product.getStock() < quantity) {
+            throw new UsernameNotFoundException("Out of stock.");
+        }
+
+        product.setStock(product.getStock() - quantity);
+
+        return product;
     }
 }

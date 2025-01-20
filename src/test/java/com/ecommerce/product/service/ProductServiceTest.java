@@ -47,7 +47,7 @@ class ProductServiceTest {
         category.setName("testCategoryName");
 
         RegisterProductRequestDto requestDto = RegisterProductRequestDto.builder()
-                                                                        .categoryId(1)
+                                                                        .categoryId(1L)
                                                                         .stock(10)
                                                                         .price(100)
                                                                         .name("testName")

@@ -19,6 +19,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.ecommerce.auth.exception.TokenInvalidException;
 import com.ecommerce.auth.jwt.JwtProvider;
+import com.ecommerce.order.DTO.OrderProductRequestDto;
+import com.ecommerce.order.controller.OrderController;
 import com.ecommerce.product.controller.ProductController;
 import com.ecommerce.product.dto.RegisterProductRequestDto;
 import com.ecommerce.store.DTO.RegisterStoreRequestDto;
@@ -48,6 +50,9 @@ class SecurityConfigTest {
 
     @MockBean
     private ProductController productController;
+
+    @MockBean
+    private OrderController orderController;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -178,7 +183,7 @@ class SecurityConfigTest {
                 .thenReturn(ResponseEntity.ok().build());
 
         RegisterProductRequestDto requestDto = RegisterProductRequestDto.builder()
-                                                                        .categoryId(1)
+                                                                        .categoryId(1L)
                                                                         .stock(10)
                                                                         .price(100)
                                                                         .name("test")
@@ -191,6 +196,51 @@ class SecurityConfigTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(requestBody))
                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("USER 권한이 있는 경우(ex USER 권한) post /api/orders 접근할 수 있다.")
+    void givenUserRole_whenAccessingOrderEndpoint_thenAllowAccess() throws Exception {
+        // Given
+        String accessToken = "valid-access-token";
+
+        when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(accessToken);
+        when(jwtProvider.validateAccessToken(accessToken)).thenReturn(true);
+        when(jwtProvider.getSubjectFromAccessToken(accessToken)).thenReturn(TEST_PROVIDER_ID);
+        when(jwtProvider.getRoleFromAccessToken(accessToken)).thenReturn("USER");
+
+        when(orderController.orderProduct(any(OrderProductRequestDto.class)))
+                .thenReturn(ResponseEntity.ok().build());
+
+         OrderProductRequestDto requestDto = OrderProductRequestDto.builder()
+                                                                   .productId(1)
+                                                                   .phoneNumber("010-1234-1234")
+                                                                   .deliveryAddress("test Address")
+                                                                   .quantity(10).build();
+        String requestBody = objectMapper.writeValueAsString(requestDto);
+        // When & Then
+        mockMvc.perform(post("/api/orders")
+                                .header("Authorization", "Bearer " + accessToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(requestBody))
+               .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("USER 권한이 없는 경우(ex USER 권한) post /api/orders 접근할 수 없다.")
+    void givenNotUserRole_whenAccessingOrderEndpoint_thenInaccessible() throws Exception {
+        // Given
+        String accessToken = "valid-access-token";
+
+        when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(accessToken);
+        when(jwtProvider.validateAccessToken(accessToken)).thenReturn(true);
+        when(jwtProvider.getSubjectFromAccessToken(accessToken)).thenReturn(TEST_PROVIDER_ID);
+        when(jwtProvider.getRoleFromAccessToken(accessToken)).thenReturn("TEMP");
+
+        // When & Then
+        mockMvc.perform(post("/api/orders")
+                                .header("Authorization", "Bearer " + accessToken))
+               .andExpect(status().isForbidden());
     }
 
     @Test

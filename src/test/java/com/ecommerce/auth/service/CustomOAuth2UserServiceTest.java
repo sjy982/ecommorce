@@ -21,7 +21,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import com.ecommerce.auth.model.CustomOAuth2UserDetails;
 import com.ecommerce.auth.provider.GoogleUserInfo;
 import com.ecommerce.auth.provider.OAuth2UserInfoProvider;
-import com.ecommerce.user.model.User;
+import com.ecommerce.user.model.Users;
 import com.ecommerce.user.model.UserRole;
 import com.ecommerce.user.repository.UserRepository;
 
@@ -87,13 +87,13 @@ class CustomOAuth2UserServiceTest {
         String email = "test@example.com";
         String name = "Test User";
         String providerId = provider + "_" + subject;
-        User user = User.builder()
-                        .name(name)
-                        .providerId(providerId)
-                        .subject(subject)
-                        .email(email)
-                        .provider(provider)
-                        .build();
+        Users user = Users.builder()
+                          .name(name)
+                          .providerId(providerId)
+                          .subject(subject)
+                          .email(email)
+                          .provider(provider)
+                          .build();
         when(oAuth2User.getAttributes()).thenReturn(Map.of("sub", subject, "email", email, "name", name));
         when(defaultOAuth2UserService.loadUser(userRequest)).thenReturn(oAuth2User);
 

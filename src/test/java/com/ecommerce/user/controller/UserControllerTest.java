@@ -20,7 +20,7 @@ import com.ecommerce.security.WithMockCustomUser;
 import com.ecommerce.user.DTO.RegisterUserRequestDto;
 import com.ecommerce.user.DTO.RegisterUserResponseDto;
 import com.ecommerce.user.DTO.TokenResponseDto;
-import com.ecommerce.user.model.User;
+import com.ecommerce.user.model.Users;
 import com.ecommerce.user.model.UserRole;
 import com.ecommerce.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,7 +29,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ActiveProfiles("test")
 @AutoConfigureMockMvc(addFilters = false)
 class UserControllerTest {
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -51,7 +50,7 @@ class UserControllerTest {
         String requestBody = objectMapper.writeValueAsString(requestDto);
 
         RegisterUserResponseDto responseDto = new RegisterUserResponseDto(
-                new User(), "access-token", "refresh-token");
+                new Users(), "access-token", "refresh-token");
 
         // Mock 설정
         when(userService.registerUser(TEST_PROVIDER_ID, requestDto)).thenReturn(responseDto);
