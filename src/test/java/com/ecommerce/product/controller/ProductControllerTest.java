@@ -45,14 +45,14 @@ class ProductControllerTest {
         RegisterProductRequestDto requestDto = RegisterProductRequestDto.builder()
                                                                         .categoryId(1L)
                                                                         .stock(10)
-                                                                        .price(100)
+                                                                        .price(100L)
                                                                         .name(TEST_PROVIDER_ID)
                                                                         .description("testDiscription")
                                                                         .build();
 
         String store = "test store";
-        long price = 100;
-        long stock = 10;
+        Long price = 100L;
+        Integer stock = 10;
         String description = "test description";
         String category = "식품";
         RegisterProductResponseDto responseDto = RegisterProductResponseDto.builder()

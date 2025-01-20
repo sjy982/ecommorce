@@ -10,8 +10,8 @@ import lombok.Data;
 public class RegisterProductResponseDto {
     private String store;
     private String name;
-    private long price;
-    private long stock;
+    private Long price;
+    private Integer stock;
     private String description;
     private String category;
 }
