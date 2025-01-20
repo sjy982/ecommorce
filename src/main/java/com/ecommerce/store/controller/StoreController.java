@@ -30,7 +30,7 @@ public class StoreController {
         RegisterStoreResponseDto registerStoreResponseDto = storeService.registerStore(dto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .header("Authorization", registerStoreResponseDto.getAccessToken())
+                .header("Authorization", "Bearer " + registerStoreResponseDto.getAccessToken())
                 .header("Refresh-Token", registerStoreResponseDto.getRefreshToken())
                 .body(ApiResponseUtil.createResponse(HttpStatus.CREATED.value(), registerStoreResponseDto.getStore(), "store created"));
     }

@@ -1,6 +1,6 @@
 package com.ecommerce.user.DTO;
 
-import com.ecommerce.user.model.User;
+import com.ecommerce.user.model.Users;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,7 +8,7 @@ import lombok.Data;
 @AllArgsConstructor
 @Data
 public class RegisterUserResponseDto {
-    private User user;
+    private Users user;
     private String accessToken;
     private String refreshToken;
 }
