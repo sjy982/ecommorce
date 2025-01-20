@@ -20,7 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
-import com.ecommerce.user.model.User;
+import com.ecommerce.user.model.Users;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -47,13 +47,13 @@ class UserRedisServiceTest {
     void givenKeyAndUser_whenSaveCalled_thenShouldSaveUserInRedis() throws JsonProcessingException {
         // Given
         String key = "testKey";
-        User user = User.builder()
-                        .provider("test provider")
-                        .providerId("test providerId")
-                        .subject("test subject")
-                        .email("test email")
-                        .name("Test User")
-                        .build();
+        Users user = Users.builder()
+                          .provider("test provider")
+                          .providerId("test providerId")
+                          .subject("test subject")
+                          .email("test email")
+                          .name("Test User")
+                          .build();
         String json = "{\"name\":\"Test User\"}";
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(objectMapper.writeValueAsString(user)).thenReturn(json);
@@ -71,14 +71,14 @@ class UserRedisServiceTest {
         // Given
         String key = "testKey";
         String json = "{\"name\":\"Test User\"}";
-        User user = new User();
+        Users user = new Users();
         user.setName("Test User");
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get(prefix + key)).thenReturn(json);
-        when(objectMapper.readValue(json, User.class)).thenReturn(user);
+        when(objectMapper.readValue(json, Users.class)).thenReturn(user);
 
         // When
-        User result = userRedisService.get(key);
+        Users result = userRedisService.get(key);
 
         // Then
         assertNotNull(result);
@@ -94,7 +94,7 @@ class UserRedisServiceTest {
         when(valueOperations.get(prefix + key)).thenReturn(null);
 
         // When
-        User result = userRedisService.get(key);
+        Users result = userRedisService.get(key);
 
         // Then
         assertNull(result);
@@ -108,7 +108,7 @@ class UserRedisServiceTest {
         String invalidJson = "invalid-json";
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get(prefix + key)).thenReturn(invalidJson);
-        when(objectMapper.readValue(invalidJson, User.class)).thenThrow(new JsonProcessingException("Error") {});
+        when(objectMapper.readValue(invalidJson, Users.class)).thenThrow(new JsonProcessingException("Error") {});
 
         // When & Then
         assertThrows(RuntimeException.class, () -> userRedisService.get(key));

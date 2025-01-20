@@ -43,7 +43,7 @@ class ProductControllerTest {
     void givenRegisterProductDto_whenRegisterProduct_thenShouldReturnCratedResponse() throws Exception {
         // Given
         RegisterProductRequestDto requestDto = RegisterProductRequestDto.builder()
-                                                                        .categoryId(1)
+                                                                        .categoryId(1L)
                                                                         .stock(10)
                                                                         .price(100)
                                                                         .name(TEST_PROVIDER_ID)

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import com.ecommerce.auth.model.CustomOAuth2UserDetails;
 import com.ecommerce.auth.provider.OAuth2UserInfo;
 import com.ecommerce.auth.provider.OAuth2UserInfoProvider;
-import com.ecommerce.user.model.User;
+import com.ecommerce.user.model.Users;
 import com.ecommerce.user.model.UserRole;
 import com.ecommerce.user.repository.UserRepository;
 
@@ -43,11 +43,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         String providerId = provider + "_" + subject;
 
-        Optional<User> optionalUser = userRepository.findByProviderId(providerId);
-        User user;
+        Optional<Users> optionalUser = userRepository.findByProviderId(providerId);
+        Users user;
         String role = UserRole.USER.name();
         if(optionalUser.isEmpty()) {
-            user = User.builder()
+            user = Users.builder()
                         .provider(provider)
                         .subject(subject)
                         .email(email)

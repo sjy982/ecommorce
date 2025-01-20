@@ -1,6 +1,7 @@
 package com.ecommerce.user.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.ecommerce.auth.jwt.JwtProvider;
@@ -10,7 +11,7 @@ import com.ecommerce.user.DTO.RegisterUserResponseDto;
 import com.ecommerce.user.DTO.TokenResponseDto;
 import com.ecommerce.user.Exception.RefreshTokenException;
 import com.ecommerce.user.Exception.SessionExpiredException;
-import com.ecommerce.user.model.User;
+import com.ecommerce.user.model.Users;
 import com.ecommerce.user.model.UserRole;
 import com.ecommerce.user.repository.UserRepository;
 
@@ -33,7 +34,7 @@ public class UserService {
     }
 
     public RegisterUserResponseDto registerUser(String providerId, RegisterUserRequestDto registerUserRequestDto) {
-        User user = userRedisService.get(providerId);
+        Users user = userRedisService.get(providerId);
         if(user == null) {
             throw new SessionExpiredException("The temporary registration session has expired.");
         }
@@ -66,5 +67,11 @@ public class UserService {
         refreshTokenRedisService.save(sub, newRefreshToken);
 
         return new TokenResponseDto(newAccessToken, newRefreshToken);
+    }
+
+    public Users findByProviderId(String providerId) {
+        Users user = userRepository.findByProviderId(providerId)
+                                   .orElseThrow(() -> new UsernameNotFoundException("product not found"));
+        return user;
     }
 }
