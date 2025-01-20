@@ -17,7 +17,7 @@ public class Store {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(nullable = false, unique = true)
     private String name;
@@ -29,6 +29,6 @@ public class Store {
     private String phoneNumber;
 
     @Column(nullable = false)
-    private long totalSales = 0;
+    private Long totalSales = 0L;
 }
 

@@ -18,7 +18,7 @@ public class RegisterProductRequestDto {
     private String name;
 
     @NotNull(message = "price is required.")
-    private Integer price;
+    private Long price;
 
     @NotNull(message = "stock is required.")
     private Integer stock;
