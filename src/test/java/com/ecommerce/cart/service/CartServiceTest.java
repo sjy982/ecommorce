@@ -1,38 +1,39 @@
-package com.ecommerce.order.service;
+package com.ecommerce.cart.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ecommerce.cart.DTO.AddItemToCartRequestDto;
+import com.ecommerce.cart.DTO.AddItemToCartResponseDto;
 import com.ecommerce.cart.model.Cart;
 import com.ecommerce.cart.repository.CartRepository;
+import com.ecommerce.cartItem.model.CartItem;
+import com.ecommerce.cartItem.repository.CartItemRepository;
 import com.ecommerce.category.model.Category;
 import com.ecommerce.category.repository.CategoryRepository;
-import com.ecommerce.order.DTO.OrderProductRequestDto;
-import com.ecommerce.order.DTO.OrderProductResponseDto;
-import com.ecommerce.order.model.Orders;
 import com.ecommerce.order.repository.OrderRepository;
 import com.ecommerce.product.model.Product;
 import com.ecommerce.product.repository.ProductRepository;
+
 import com.ecommerce.store.model.Store;
 import com.ecommerce.store.repository.StoreRepository;
 import com.ecommerce.user.model.Users;
 import com.ecommerce.user.repository.UserRepository;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-
 @SpringBootTest
 @ActiveProfiles("test")
-class OrderServiceTest {
+class CartServiceTest {
     @Autowired
-    private OrderService orderService;
+    private CartService cartService;
 
     @Autowired
     private StoreRepository storeRepository;
@@ -52,10 +53,13 @@ class OrderServiceTest {
     @Autowired
     private CartRepository cartRepository;
 
+    @Autowired
+    private CartItemRepository cartItemRepository;
+
     private Users user;
+
     private Product product;
 
-    private Store store;
 
     @BeforeEach
     void setup() {
@@ -75,12 +79,12 @@ class OrderServiceTest {
 
         userRepository.save(user);
 
-        store = Store.builder()
-                           .name("testName")
-                           .password("testPw")
-                           .phoneNumber("010-1234-1234")
-                           .totalSales(1000L)
-                           .build();
+        Store store = Store.builder()
+                     .name("testName")
+                     .password("testPw")
+                     .phoneNumber("010-1234-1234")
+                     .totalSales(1000L)
+                     .build();
 
         storeRepository.save(store);
 
@@ -92,7 +96,7 @@ class OrderServiceTest {
         product = Product.builder()
                          .name("testName")
                          .price(100L)
-                         .stock(20)
+                         .stock(50)
                          .store(store)
                          .category(category)
                          .build();
@@ -101,36 +105,36 @@ class OrderServiceTest {
     }
 
     @Test
-    @DisplayName("유저가 특정 상품을 주문했을 때 해당 상품의 재고가 충분한다면 주민이 완료되어야 한다.")
+    @DisplayName("유저가 상품을 카트에 담을 때 재고가 충분하다면 담을 수 있어야 한다.")
     @Transactional
-    void givenOrderProductRequestDto_whenOrderProduct_thenSuccessOrder() {
+    void givenAddItemToCartRequestDto_whenAddItemToCart_thenSuccessAdd() {
         // Given
-        OrderProductRequestDto requestDto = OrderProductRequestDto.builder()
-                .productId(product.getId())
-                .quantity(10)
-                .deliveryAddress("test Address")
-                .phoneNumber("010-1234-1234").build();
+        AddItemToCartRequestDto requestDto = AddItemToCartRequestDto.builder()
+                .productId(1L)
+                .quantity(10).build();
 
         // When
-        OrderProductResponseDto responseDto = orderService.orderProduct(user.getProviderId(), requestDto);
+        AddItemToCartResponseDto responseDto = cartService.addItemToCart(user.getProviderId(), requestDto);
 
         // Then
         assertEquals(product.getName(), responseDto.getProductName());
-        assertEquals(product.getPrice(), responseDto.getProductPrice());
-        assertEquals(requestDto.getQuantity(), responseDto.getQuantity());
-        assertEquals(requestDto.getDeliveryAddress(), responseDto.getDeliveryAddress());
-        assertEquals(requestDto.getPhoneNumber(), responseDto.getPhoneNumber());
 
-        Orders newOrder = orderRepository.findByUserProviderId(user.getProviderId()).get();
-        Product updatedProduct = productRepository.findById(product.getId()).get();
-        Store updatedStore = storeRepository.findById(store.getId()).get();
+        CartItem newCartItem = cartItemRepository.findByCartId(user.getCart().getId()).get();
 
-        assertEquals(newOrder.getProduct().getId(), updatedProduct.getId());
-        assertEquals(newOrder.getStore().getId(), updatedStore.getId());
-        assertEquals(newOrder.getUser().getProviderId(), user.getProviderId());
+        assertEquals(newCartItem.getProduct().getName(), responseDto.getProductName());
+        assertEquals(newCartItem.getQuantity(), responseDto.getQuantity());
+    }
 
-        // 업데이트 된 stock, totalSales 검사
-        assertEquals(10, updatedProduct.getStock());
-        assertEquals(2000, updatedStore.getTotalSales());
+    @Test
+    @DisplayName("유저가 상품을 카트에 담을 때 재고가 충분하지 않다면 담지 못해야 한다.")
+    @Transactional
+    void givenOutOfStockAddItemToCartRequestDto_whenAddItemToCart_thenFailedAdd() {
+        // Given
+        AddItemToCartRequestDto requestDto = AddItemToCartRequestDto.builder()
+                                                                    .productId(1L)
+                                                                    .quantity(60).build();
+
+        // When && Then
+        assertThrows(UsernameNotFoundException.class, () -> cartService.addItemToCart(user.getProviderId(), requestDto));
     }
 }

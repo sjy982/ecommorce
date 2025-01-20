@@ -40,7 +40,7 @@ public class StoreService {
                               .name(dto.getName())
                               .password(passwordEncoder.encode(dto.getPassword()))
                               .phoneNumber(dto.getPhoneNumber())
-                              .totalSales(0)
+                              .totalSales(0L)
                               .build();
 
         storeRepository.save(newStore);

@@ -47,14 +47,17 @@ public class ProductService {
     }
 
     public Product decreaseStock(long id, int quantity) {
-        Product product = findById(id);
+        Product product = checkQuantity(id, quantity);
+        product.setStock(product.getStock() - quantity);
+        return product;
+    }
 
+    public Product checkQuantity(long id, int quantity) {
+        Product product = findById(id);
         if(product.getStock() < quantity) {
             throw new UsernameNotFoundException("Out of stock.");
         }
-
-        product.setStock(product.getStock() - quantity);
-
         return product;
+
     }
 }

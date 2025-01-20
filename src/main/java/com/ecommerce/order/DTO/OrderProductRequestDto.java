@@ -15,10 +15,10 @@ import lombok.NoArgsConstructor;
 public class OrderProductRequestDto {
 
     @NotNull(message = "productId is required")
-    private long productId;
+    private Long productId;
 
     @NotNull(message = "productStock is required")
-    private int quantity;
+    private Integer quantity;
 
     @NotBlank(message = "deliveryAddress is required")
     private String deliveryAddress;

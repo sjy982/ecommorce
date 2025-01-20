@@ -20,16 +20,16 @@ public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(nullable = false)
     private String name;
 
     @Column(nullable = false)
-    private int price;
+    private Long price;
 
     @Column(nullable = false)
-    private int stock;
+    private Integer stock;
 
     @Column(columnDefinition = "TEXT")
     private String description;
