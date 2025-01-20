@@ -9,8 +9,8 @@ import lombok.Data;
 @Builder
 public class OrderProductResponseDto {
     private String productName;
-    private long productPrice;
-    private int quantity;
+    private Long productPrice;
+    private Integer quantity;
     private String deliveryAddress;
     private String phoneNumber;
 }

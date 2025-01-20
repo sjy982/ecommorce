@@ -60,7 +60,7 @@ class ProductRepositoryTest {
 
         product = Product.builder()
                          .name("testName")
-                         .price(100)
+                         .price(100L)
                          .stock(10)
                          .store(store)
                          .category(category)
@@ -73,9 +73,9 @@ class ProductRepositoryTest {
     @DisplayName("재고량이 충분할 때는 업데이트가 되어야 한다.")
     void givenSufficientStock_whenDecreaseStock_thenUpdateSuccess() {
         // Given
-        long productId = product.getId();
-        long curStock = product.getStock();
-        int quantity = 5;
+        Long productId = product.getId();
+        Integer curStock = product.getStock();
+        Integer quantity = 5;
 
         // When
         productService.decreaseStock(productId, quantity);

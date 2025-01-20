@@ -19,6 +19,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.ecommerce.auth.exception.TokenInvalidException;
 import com.ecommerce.auth.jwt.JwtProvider;
+import com.ecommerce.cart.DTO.AddItemToCartRequestDto;
+import com.ecommerce.cart.controller.CartController;
 import com.ecommerce.order.DTO.OrderProductRequestDto;
 import com.ecommerce.order.controller.OrderController;
 import com.ecommerce.product.controller.ProductController;
@@ -53,6 +55,9 @@ class SecurityConfigTest {
 
     @MockBean
     private OrderController orderController;
+
+    @MockBean
+    private CartController cartController;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -185,7 +190,7 @@ class SecurityConfigTest {
         RegisterProductRequestDto requestDto = RegisterProductRequestDto.builder()
                                                                         .categoryId(1L)
                                                                         .stock(10)
-                                                                        .price(100)
+                                                                        .price(100L)
                                                                         .name("test")
                                                                         .description("test")
                                                                         .build();
@@ -213,7 +218,7 @@ class SecurityConfigTest {
                 .thenReturn(ResponseEntity.ok().build());
 
          OrderProductRequestDto requestDto = OrderProductRequestDto.builder()
-                                                                   .productId(1)
+                                                                   .productId(1L)
                                                                    .phoneNumber("010-1234-1234")
                                                                    .deliveryAddress("test Address")
                                                                    .quantity(10).build();
@@ -239,6 +244,50 @@ class SecurityConfigTest {
 
         // When & Then
         mockMvc.perform(post("/api/orders")
+                                .header("Authorization", "Bearer " + accessToken))
+               .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("USER 권한이 있는 경우(ex USER 권한) post /api/cart/item 접근할 수 있다.")
+    void givenUserRole_whenAccessingCartItemEndpoint_thenAllowAccess() throws Exception {
+        // Given
+        String accessToken = "valid-access-token";
+
+        when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(accessToken);
+        when(jwtProvider.validateAccessToken(accessToken)).thenReturn(true);
+        when(jwtProvider.getSubjectFromAccessToken(accessToken)).thenReturn(TEST_PROVIDER_ID);
+        when(jwtProvider.getRoleFromAccessToken(accessToken)).thenReturn("USER");
+
+        when(cartController.addItemToCart(any(AddItemToCartRequestDto.class)))
+                .thenReturn(ResponseEntity.ok().build());
+
+        AddItemToCartRequestDto requestDto = AddItemToCartRequestDto.builder()
+                                                                    .productId(1L)
+                                                                    .quantity(10).build();
+
+        String requestBody = objectMapper.writeValueAsString(requestDto);
+        // When & Then
+        mockMvc.perform(post("/api/cart/item")
+                                .header("Authorization", "Bearer " + accessToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(requestBody))
+               .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("USER 권한이 없는 경우(ex USER 권한) post /api/cart/item 접근할 수 없다.")
+    void givenNotUserRole_whenAccessingCartItemEndpoint_thenInaccessible() throws Exception {
+        // Given
+        String accessToken = "valid-access-token";
+
+        when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(accessToken);
+        when(jwtProvider.validateAccessToken(accessToken)).thenReturn(true);
+        when(jwtProvider.getSubjectFromAccessToken(accessToken)).thenReturn(TEST_PROVIDER_ID);
+        when(jwtProvider.getRoleFromAccessToken(accessToken)).thenReturn("TEMP");
+
+        // When & Then
+        mockMvc.perform(post("/api/cart/item")
                                 .header("Authorization", "Bearer " + accessToken))
                .andExpect(status().isForbidden());
     }
