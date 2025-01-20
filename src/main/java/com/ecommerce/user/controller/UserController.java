@@ -18,7 +18,7 @@ import com.ecommerce.common.response.ApiResponseUtil;
 import com.ecommerce.user.DTO.RegisterUserRequestDto;
 import com.ecommerce.user.DTO.RegisterUserResponseDto;
 import com.ecommerce.user.DTO.TokenResponseDto;
-import com.ecommerce.user.model.User;
+import com.ecommerce.user.model.Users;
 import com.ecommerce.user.service.UserService;
 
 import jakarta.validation.Valid;
@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UserController {
     private final UserService userService;
     @PostMapping
-    public ResponseEntity<ApiResponse<User>> registerUser(@RequestBody @Valid RegisterUserRequestDto dto) {
+    public ResponseEntity<ApiResponse<Users>> registerUser(@RequestBody @Valid RegisterUserRequestDto dto) {
         String providerId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         RegisterUserResponseDto registerUserResponseDto = userService.registerUser(providerId, dto);
         return ResponseEntity

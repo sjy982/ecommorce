@@ -20,7 +20,7 @@ import com.ecommerce.user.DTO.RegisterUserResponseDto;
 import com.ecommerce.user.DTO.TokenResponseDto;
 import com.ecommerce.user.Exception.RefreshTokenException;
 import com.ecommerce.user.Exception.SessionExpiredException;
-import com.ecommerce.user.model.User;
+import com.ecommerce.user.model.Users;
 import com.ecommerce.user.model.UserRole;
 import com.ecommerce.user.repository.UserRepository;
 
@@ -49,7 +49,7 @@ class UserServiceTest {
         String phone = "010-1234-5678";
         String address = "Test Address";
         RegisterUserRequestDto requestDto = new RegisterUserRequestDto(phone, address);
-        User user = new User();
+        Users user = new Users();
         user.setProviderId(providerId);
 
         when(userRedisService.get(providerId)).thenReturn(user);

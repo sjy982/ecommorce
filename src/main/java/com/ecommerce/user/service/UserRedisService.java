@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import com.ecommerce.user.model.User;
+import com.ecommerce.user.model.Users;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -23,7 +23,7 @@ public class UserRedisService {
         this.objectMapper = objectMapper;
     }
 
-    public void save(String key, User value) {
+    public void save(String key, Users value) {
         try {
             String json = objectMapper.writeValueAsString(value);
             redisTemplate.opsForValue().set(prefix + key, json, timeoutDuration);
@@ -32,15 +32,15 @@ public class UserRedisService {
         }
     }
 
-    public User get(String key) {
+    public Users get(String key) {
         String json = redisTemplate.opsForValue().get(prefix + key);
         if(json == null) {
             return null;
         }
         try {
-            return objectMapper.readValue(json, User.class);
+            return objectMapper.readValue(json, Users.class);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error deserializing JSON to " + User.class.getName(), e);
+            throw new RuntimeException("Error deserializing JSON to " + Users.class.getName(), e);
         }
     }
 

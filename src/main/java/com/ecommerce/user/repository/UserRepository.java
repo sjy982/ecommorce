@@ -4,8 +4,8 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.ecommerce.user.model.User;
+import com.ecommerce.user.model.Users;
 
-public interface UserRepository extends JpaRepository<User, Integer> {
-    Optional<User> findByProviderId(String providerId);
+public interface UserRepository extends JpaRepository<Users, Long> {
+    Optional<Users> findByProviderId(String providerId);
 }

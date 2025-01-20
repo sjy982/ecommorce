@@ -27,5 +27,5 @@ public class RegisterProductRequestDto {
     private String description;
 
     @NotNull(message = "categoryId is required.")
-    private Integer categoryId;
+    private Long categoryId;
 }

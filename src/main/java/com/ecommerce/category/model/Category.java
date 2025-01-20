@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity(name = "category")
+@Entity
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,7 +15,7 @@ public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private long id;
 
     @Column(nullable = false, unique = true)
     private String name;

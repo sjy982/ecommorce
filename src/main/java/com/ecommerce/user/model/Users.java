@@ -8,15 +8,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity(name = "user")
+@Entity
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private long id;
 
     @Column(nullable = false, unique = true)
     private String providerId;
