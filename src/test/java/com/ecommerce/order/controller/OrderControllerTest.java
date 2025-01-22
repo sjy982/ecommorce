@@ -16,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.ecommerce.order.DTO.OrderProductDto;
 import com.ecommerce.order.DTO.OrderProductRequestDto;
 import com.ecommerce.order.DTO.OrderProductResponseDto;
 import com.ecommerce.order.service.OrderService;
@@ -49,11 +50,12 @@ class OrderControllerTest {
         String requestBody = objectMapper.writeValueAsString(requestDto);
 
         OrderProductResponseDto responseDto = OrderProductResponseDto.builder()
-                .productName("test Name")
-                .phoneNumber("010-1234-1234")
-                .productPrice(100L)
-                .deliveryAddress("test Address")
-                .quantity(10).build();
+                                                                     .orderProduct(OrderProductDto.builder()
+                                                                                                  .name("test Name")
+                                                                                                  .quantity(10).price(100L).
+                                                                                                  build())
+                                                                     .deliveryAddress("test Address")
+                                                                     .phoneNumber("010-1234-1234").build();
 
         when(orderService.orderProduct(TEST_PROVIDER_ID, requestDto)).thenReturn(responseDto);
 
@@ -63,10 +65,10 @@ class OrderControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(requestBody))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.productName").value("test Name"))
+                .andExpect(jsonPath("$.data.orderProduct.name").value("test Name"))
                 .andExpect(jsonPath("$.data.phoneNumber").value("010-1234-1234"))
-                .andExpect(jsonPath("$.data.productPrice").value(100))
+                .andExpect(jsonPath("$.data.orderProduct.price").value(100))
                 .andExpect(jsonPath("$.data.deliveryAddress").value("test Address"))
-                .andExpect(jsonPath("$.data.quantity").value(10));
+                .andExpect(jsonPath("$.data.orderProduct.quantity").value(10));
     }
 }

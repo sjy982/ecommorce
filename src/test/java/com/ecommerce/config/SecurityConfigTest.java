@@ -293,6 +293,43 @@ class SecurityConfigTest {
     }
 
     @Test
+    @DisplayName("USER 권한이 있는 경우(ex USER 권한) get /api/cart/items 접근할 수 있다.")
+    void givenUserRole_whenAccessingCartItemsEndpoint_thenAllowAccess() throws Exception {
+        // Given
+        String accessToken = "valid-access-token";
+
+        when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(accessToken);
+        when(jwtProvider.validateAccessToken(accessToken)).thenReturn(true);
+        when(jwtProvider.getSubjectFromAccessToken(accessToken)).thenReturn(TEST_PROVIDER_ID);
+        when(jwtProvider.getRoleFromAccessToken(accessToken)).thenReturn("USER");
+
+        when(cartController.getCartItems())
+                .thenReturn(ResponseEntity.ok().build());
+
+        // When & Then
+        mockMvc.perform(get("/api/cart/items")
+                                .header("Authorization", "Bearer " + accessToken))
+               .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("USER 권한이 없는 경우(ex USER 권한) get /api/cart/items 접근할 수 없다.")
+    void givenNotUserRole_whenAccessingCartItemsEndpoint_thenInaccessible() throws Exception {
+        // Given
+        String accessToken = "valid-access-token";
+
+        when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(accessToken);
+        when(jwtProvider.validateAccessToken(accessToken)).thenReturn(true);
+        when(jwtProvider.getSubjectFromAccessToken(accessToken)).thenReturn(TEST_PROVIDER_ID);
+        when(jwtProvider.getRoleFromAccessToken(accessToken)).thenReturn("TEMP");
+
+        // When & Then
+        mockMvc.perform(get("/api/cart/items")
+                                .header("Authorization", "Bearer " + accessToken))
+               .andExpect(status().isForbidden());
+    }
+
+    @Test
     @DisplayName("올바르지 않은 AccessToken이 주어졌을 때 401 Unauthorized를 반환한다.")
     void givenInvalidAccessToken_whenAccessingUsersEndpoint_thenReturnUnauthorized() throws Exception {
         // Given

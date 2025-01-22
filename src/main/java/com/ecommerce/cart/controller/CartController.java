@@ -1,6 +1,5 @@
 package com.ecommerce.cart.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -38,7 +37,7 @@ public class CartController {
     }
 
     @GetMapping("/items")
-    public ResponseEntity<ApiResponse<List<CartItemResponseDto>>> getCartItem() {
+    public ResponseEntity<ApiResponse<List<CartItemResponseDto>>> getCartItems() {
         String providerId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<CartItemResponseDto> items = cartService.getCartItems(providerId);
         return ResponseEntity
