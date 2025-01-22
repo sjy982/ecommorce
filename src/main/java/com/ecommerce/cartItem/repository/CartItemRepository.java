@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -18,4 +19,12 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
            "JOIN ci.product p " +
            "WHERE ci.cart.id = :cartId")
     List<CartItemProjection> findCartItemsByCartId(@Param("cartId") long cartId);
+
+    @Query("SELECT ci FROM CartItem ci WHERE ci.id IN :cartItemIds")
+    List<CartItem> findByIdIn(@Param("cartItemIds") List<Long> cartItemIds);
+
+    @Modifying
+    @Query("DELETE FROM CartItem ci WHERE ci.id IN :cartItemIds")
+    void deleteByIdIn(@Param("cartItemIds") List<Long> cartItemIds);
+
 }
