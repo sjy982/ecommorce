@@ -33,7 +33,7 @@ public class Orders {
     @JoinColumn(name = "storeId", nullable = false)
     private Store store;
 
-    @OneToOne()
+    @ManyToOne
     @JoinColumn(name = "productId", nullable = false)
     private Product product;
 
