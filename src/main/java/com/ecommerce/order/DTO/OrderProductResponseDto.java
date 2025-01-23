@@ -8,9 +8,7 @@ import lombok.Data;
 @AllArgsConstructor
 @Builder
 public class OrderProductResponseDto {
-    private String productName;
-    private Long productPrice;
-    private Integer quantity;
+    private OrderProductDto orderProduct;
     private String deliveryAddress;
     private String phoneNumber;
 }
