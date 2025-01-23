@@ -2,6 +2,8 @@ package com.ecommerce.order.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -115,19 +117,19 @@ class OrderServiceTest {
         OrderProductResponseDto responseDto = orderService.orderProduct(user.getProviderId(), requestDto);
 
         // Then
-        assertEquals(product.getName(), responseDto.getProductName());
-        assertEquals(product.getPrice(), responseDto.getProductPrice());
-        assertEquals(requestDto.getQuantity(), responseDto.getQuantity());
+        assertEquals(product.getName(), responseDto.getOrderProduct().getName());
+        assertEquals(product.getPrice(), responseDto.getOrderProduct().getPrice());
+        assertEquals(requestDto.getQuantity(), responseDto.getOrderProduct().getQuantity());
         assertEquals(requestDto.getDeliveryAddress(), responseDto.getDeliveryAddress());
         assertEquals(requestDto.getPhoneNumber(), responseDto.getPhoneNumber());
 
-        Orders newOrder = orderRepository.findByUserProviderId(user.getProviderId()).get();
+        List<Orders> newOrder = orderRepository.findAllByUserProviderId(user.getProviderId());
         Product updatedProduct = productRepository.findById(product.getId()).get();
         Store updatedStore = storeRepository.findById(store.getId()).get();
 
-        assertEquals(newOrder.getProduct().getId(), updatedProduct.getId());
-        assertEquals(newOrder.getStore().getId(), updatedStore.getId());
-        assertEquals(newOrder.getUser().getProviderId(), user.getProviderId());
+        assertEquals(newOrder.get(0).getProduct().getId(), updatedProduct.getId());
+        assertEquals(newOrder.get(0).getStore().getId(), updatedStore.getId());
+        assertEquals(newOrder.get(0).getUser().getProviderId(), user.getProviderId());
 
         // 업데이트 된 stock, totalSales 검사
         assertEquals(10, updatedProduct.getStock());

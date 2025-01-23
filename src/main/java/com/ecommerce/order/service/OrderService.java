@@ -3,6 +3,7 @@ package com.ecommerce.order.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ecommerce.order.DTO.OrderProductDto;
 import com.ecommerce.order.DTO.OrderProductRequestDto;
 import com.ecommerce.order.DTO.OrderProductResponseDto;
 import com.ecommerce.order.model.Orders;
@@ -48,9 +49,10 @@ public class OrderService {
         orderRepository.save(order);
 
         OrderProductResponseDto responseDto = OrderProductResponseDto.builder()
-                .productName(order.getProduct().getName())
-                .productPrice(order.getProduct().getPrice())
-                .quantity(order.getQuantity())
+                .orderProduct(OrderProductDto.builder()
+                                             .name(order.getProduct().getName())
+                                             .price(order.getProduct().getPrice())
+                                             .quantity(order.getQuantity()).build())
                 .deliveryAddress(order.getDeliveryAddress())
                 .phoneNumber(order.getPhoneNumber()).build();
 
