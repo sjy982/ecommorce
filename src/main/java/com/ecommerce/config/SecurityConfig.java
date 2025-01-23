@@ -100,6 +100,7 @@ public class SecurityConfig  {
                         .requestMatchers(HttpMethod.POST, "api/orders").hasRole(UserRole.USER.name())
                         .requestMatchers(HttpMethod.POST, "api/cart/item").hasRole(UserRole.USER.name())
                         .requestMatchers(HttpMethod.GET, "api/cart/items").hasRole(UserRole.USER.name())
+                        .requestMatchers(HttpMethod.POST, "api/cart/items/order").hasRole(UserRole.USER.name())
                         .requestMatchers("api/admin/**").hasRole(UserRole.ADMIN.name())
                         .requestMatchers(HttpMethod.POST, "api/product").hasRole(UserRole.STORE.name())
                         .anyRequest().permitAll())
