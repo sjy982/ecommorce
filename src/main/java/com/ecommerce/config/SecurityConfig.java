@@ -32,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig  {
     private static final String[] OAUTH2_PATHS = {"/api/auth/login/**", "/oauth2/**", "/login/**"};
     private static final RequestMatcher PUBLIC_PATHS = RequestMatchers.anyOf(
+            new AntPathRequestMatcher("/hc"),
             new AntPathRequestMatcher("/api/store", HttpMethod.POST.name()),
             new AntPathRequestMatcher("/api/store/login", HttpMethod.POST.name())
     );
