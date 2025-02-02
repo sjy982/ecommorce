@@ -25,6 +25,23 @@ jobs:
           java-version: '17'
           distribution: 'temurin'  # 또는 'zulu', 'adopt' 등 원하는 JDK 배포판 지정
 
+      
+      # 3. Create .env file using secrets
+      - name: Create .env file
+        run: |
+          echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" > .env
+          echo "JWT_RT_SECRET_KEY=${{ secrets.JWT_RT_SECRET_KEY }}" >> .env
+          echo "JWT_VALIDITY_MS=${{ secrets.JWT_VALIDITY_MS }}" >> .env
+          echo "JWT_RT_VALIDITY_MS=${{ secrets.JWT_RT_VALIDITY_MS }}" >> .env
+          echo "JWT_TEMP_VALIDITY_MS=${{ secrets.JWT_TEMP_VALIDITY_MS }}" >> .env
+          echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
+          echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
+          echo "DB_URL=${{ secrets.DB_URL }}" >> .env
+          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
+          echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> .env
+
       - name: Build with Gradle
         run: ./gradlew build
 
