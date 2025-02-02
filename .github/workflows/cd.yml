@@ -72,12 +72,12 @@ jobs:
           host: ${{ secrets.LIVE_SERVER_IP }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            echo "${{ secrets.DEPLOY_ENV }}" | sudo tee /home/ubuntu/.env > /dev/null
+            echo "${{ secrets.DEPLOY_ENV }}" | base64 --decode | sudo tee /home/ubuntu/.env > /dev/null
 
             sudo chmod 600 /home/ubuntu/.env
 
             echo "Updated .env file contents:"
-            sudo cat /home/ubuntu/.env
+            ls -l /home/ubuntu/.env
 
       - name: Docker compose
         uses: appleboy/ssh-action@master
