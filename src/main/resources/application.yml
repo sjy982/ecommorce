@@ -1,11 +1,80 @@
-jwt:
-  secret-key: ${JWT_SECRET_KEY:}
-  rt-secret-key: ${JWT_RT_SECRET_KEY}
-  validity-in-milliseconds: ${JWT_VALIDITY_MS}
-  rt-validity-in-milliseconds: ${JWT_RT_VALIDITY_MS}
-  temp-validity-in-milliseconds: ${JWT_TEMP_VALIDITY_MS}
+spring:
+  profiles:
+    active: local
+    group:
+      local: local, common
+      blue: blue, common
+      green: green, common
+
+server:
+  env: blue
+---
 
 spring:
+  config:
+    activate:
+      on-profile: local
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            redirectUri: http://localhost:8080/login/oauth2/code/google
+
+server:
+  port: 8080
+  serverAddress: localhost
+
+serverName: local_server
+
+---
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: blue
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            redirectUri: http://${LIVE_SERVER_IP}/login/oauth2/code/google
+
+server:
+  port: 8080
+  serverAddress: ${LIVE_SERVER_IP}
+
+serverName: blue_server
+
+---
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: green
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            redirectUri: http://${LIVE_SERVER_IP}/login/oauth2/code/google
+
+server:
+  port: 8081
+  serverAddress: ${LIVE_SERVER_IP}
+
+serverName: green_server
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: common
   application:
     name: ecommerce
   security:
@@ -25,7 +94,7 @@ spring:
     password: ${DB_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
@@ -38,3 +107,10 @@ spring:
       port: ${REDIS_PORT}
 server:
   port: 8080
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
+  rt-secret-key: ${JWT_RT_SECRET_KEY}
+  validity-in-milliseconds: ${JWT_VALIDITY_MS}
+  rt-validity-in-milliseconds: ${JWT_RT_VALIDITY_MS}
+  temp-validity-in-milliseconds: ${JWT_TEMP_VALIDITY_MS}
