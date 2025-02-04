@@ -65,20 +65,6 @@ jobs:
             exit 1
           fi
 
-      - name: Update .env file on EC2
-        uses: appleboy/ssh-action@master
-        with:
-          username: ubuntu
-          host: ${{ secrets.LIVE_SERVER_IP }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            echo "${{ secrets.DEPLOY_ENV }}" | base64 --decode | sudo tee /home/ubuntu/.env > /dev/null
-            
-            sudo chmod 600 /home/ubuntu/.env
-
-            echo "Updated .env file contents:"
-            ls -l /home/ubuntu/.env
-
       - name: Docker compose
         uses: appleboy/ssh-action@master
         with:
@@ -88,13 +74,13 @@ jobs:
           script_stop: true
           script: |
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/live_server:latest
-            sudo docker-compose --env-file /home/ubuntu/.env -f docker-compose-${{ env.TARGET_UPSTREAM }}.yml up -d
+            sudo docker-compose -f docker-compose-${{ env.TARGET_UPSTREAM }}.yml up -d
 
       - name: Check deploy server URL
         uses: jtalk/url-health-check-action@v3
         with:
           url: http://${{ secrets.LIVE_SERVER_IP }}:${{ env.STOPPED_PORT }}/hc/env
-          max-attempts: 5
+          max-attempts: 3
           retry-delay: 10s
 
       - name: Update Nginx upstream
