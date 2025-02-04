@@ -105,8 +105,6 @@ spring:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
-server:
-  port: 8080
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}
