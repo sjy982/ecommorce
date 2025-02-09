@@ -1,5 +1,6 @@
 package com.ecommerce.order.service;
 
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,5 +58,10 @@ public class OrderService {
                 .phoneNumber(order.getPhoneNumber()).build();
 
         return responseDto;
+    }
+
+    public Orders findByIdOrder(Long orderId) {
+        Orders order = orderRepository.findById(orderId).orElseThrow(() -> new UsernameNotFoundException("order not found"));
+        return order;
     }
 }

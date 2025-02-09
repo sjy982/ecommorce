@@ -71,4 +71,9 @@ public class StoreService {
 
         return new LoginStoreResponseDto(accessToken, refreshToken);
     }
+
+    public Store findByIdStore(Long storeId) {
+        Store store = storeRepository.findById(storeId).orElseThrow(() -> new UsernameNotFoundException("store not found"));
+        return store;
+    }
 }
