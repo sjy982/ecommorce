@@ -5,14 +5,13 @@ on:
     branches:
       - main
       - develop
-      - feature/*
   pull_request:
     branches:
       - main
       - develop
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     steps:
