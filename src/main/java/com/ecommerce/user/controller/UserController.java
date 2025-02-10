@@ -47,8 +47,8 @@ public class UserController {
                                                                 @RequestAttribute("sub") String sub,
                                                                 @RequestAttribute("role") String role) {
         TokenResponseDto tokens = userService.refreshTokens(sub, role, refreshToken);
-        return ResponseEntity.
-                status(HttpStatus.CREATED)
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
                 .header("Authorization", "Bearer " + tokens.getAccessToken())
                 .header("Refresh-Token", tokens.getRefreshToken())
                 .body(ApiResponseUtil.createResponse(HttpStatus.CREATED.value(), "refresh tokens"));
