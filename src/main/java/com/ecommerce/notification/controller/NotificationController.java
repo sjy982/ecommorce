@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ecommerce.common.response.ApiResponse;
 import com.ecommerce.common.response.ApiResponseUtil;
+import com.ecommerce.notification.dto.NotificationResponseDto;
 import com.ecommerce.notification.model.Notification;
 import com.ecommerce.notification.service.NotificationService;
 
@@ -27,21 +28,33 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @GetMapping("/unread")
-    public ResponseEntity<ApiResponse<List<Notification>>> getUnreadNotifications() {
-        Long storeId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public ResponseEntity<ApiResponse<List<NotificationResponseDto>>> getUnreadNotifications() {
+        Long storeId = Long.parseLong((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         List<Notification> notifications = notificationService.getUnReadNotifications(storeId);
+        List<NotificationResponseDto> responseDtoList = notifications.stream()
+                .map(notification -> NotificationResponseDto.builder()
+                        .id(notification.getId())
+                        .orderId(notification.getOrder().getId())
+                        .orderStatus(notification.getOrder().getStatus())
+                        .createdAt(notification.getCreatedAt()).build()).toList();
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ApiResponseUtil.createResponse(HttpStatus.OK.value(), notifications, "success"));
+                .body(ApiResponseUtil.createResponse(HttpStatus.OK.value(), responseDtoList, "success"));
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Notification>>> getAllNotifications() {
-        Long storeId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public ResponseEntity<ApiResponse<List<NotificationResponseDto>>> getAllNotifications() {
+        Long storeId = Long.parseLong((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         List<Notification> notifications = notificationService.getAllNotifications(storeId);
+        List<NotificationResponseDto> responseDtoList = notifications.stream()
+                .map(notification -> NotificationResponseDto.builder()
+                        .id(notification.getId())
+                        .orderId(notification.getOrder().getId())
+                        .orderStatus(notification.getOrder().getStatus())
+                        .createdAt(notification.getCreatedAt()).build()).toList();
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ApiResponseUtil.createResponse(HttpStatus.OK.value(), notifications, "success"));
+                .body(ApiResponseUtil.createResponse(HttpStatus.OK.value(), responseDtoList, "success"));
     }
 
     @PatchMapping("/{notificationId}")

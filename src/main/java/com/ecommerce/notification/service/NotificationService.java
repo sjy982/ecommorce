@@ -18,12 +18,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class NotificationService {
     private final NotificationRepository notificationRepository;
-    private final StoreService storeService;
-    private final OrderService orderService;
 
-    public Notification createNotification(Long storeId, Long orderId) {
-        Store store = storeService.findByIdStore(storeId);
-        Orders order = orderService.findByIdOrder(orderId);
+    public Notification createNotification(Store store, Orders order) {
         return notificationRepository.save(Notification.builder()
                                                    .store(store)
                                                    .order(order)
