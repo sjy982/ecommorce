@@ -4,6 +4,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ecommerce.notification.service.NotificationService;
 import com.ecommerce.order.DTO.OrderProductDto;
 import com.ecommerce.order.DTO.OrderProductRequestDto;
 import com.ecommerce.order.DTO.OrderProductResponseDto;
@@ -27,6 +28,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductService productService;
     private final UserService userService;
+    private final NotificationService notificationService;
 
     @Transactional
     public OrderProductResponseDto orderProduct(String userId, OrderProductRequestDto dto) {
@@ -48,6 +50,7 @@ public class OrderService {
                              .build();
 
         orderRepository.save(order);
+        notificationService.createNotification(order.getStore(), order);
 
         OrderProductResponseDto responseDto = OrderProductResponseDto.builder()
                 .orderProduct(OrderProductDto.builder()
