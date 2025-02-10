@@ -1,6 +1,7 @@
 package com.ecommerce.config;
 
 import static com.ecommerce.config.TestConstants.TEST_PROVIDER_ID;
+import static com.ecommerce.config.TestConstants.TEST_STORE_ID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -24,6 +25,7 @@ import com.ecommerce.auth.jwt.JwtProvider;
 import com.ecommerce.cart.DTO.AddItemToCartRequestDto;
 import com.ecommerce.cart.DTO.CartItemsOrderRequestDto;
 import com.ecommerce.cart.controller.CartController;
+import com.ecommerce.notification.controller.NotificationController;
 import com.ecommerce.order.DTO.OrderProductRequestDto;
 import com.ecommerce.order.controller.OrderController;
 import com.ecommerce.product.controller.ProductController;
@@ -62,9 +64,25 @@ class SecurityConfigTest {
     @MockBean
     private CartController cartController;
 
+    @MockBean
+    private NotificationController notificationController;
+
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Test
+    @DisplayName("올바르지 않은 AccessToken이 주어졌을 때 401 Unauthorized를 반환한다.")
+    void givenInvalidAccessToken_whenAccessingUsersEndpoint_thenReturnUnauthorized() throws Exception {
+        // Given
+        String invalidAccessToken = "invalid-access-token";
+        when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(invalidAccessToken);
+        when(jwtProvider.validateAccessToken(invalidAccessToken)).thenThrow(new TokenInvalidException("Token is invalid"));
+
+        // When & Then
+        mockMvc.perform(post("/api/users/users")
+                                .header("Authorization", "Bearer " + invalidAccessToken))
+               .andExpect(status().isUnauthorized());
+    }
     @Test
     @DisplayName("OAuth2 경로 접근 시 인증이 필요하다")
     void givenUnauthenticatedUser_whenAccessingOAuth2Endpoint_thenRedirectToLogin() throws Exception {
@@ -383,16 +401,113 @@ class SecurityConfigTest {
     }
 
     @Test
-    @DisplayName("올바르지 않은 AccessToken이 주어졌을 때 401 Unauthorized를 반환한다.")
-    void givenInvalidAccessToken_whenAccessingUsersEndpoint_thenReturnUnauthorized() throws Exception {
+    @DisplayName("Store 권한이 있는 경우(ex USER 권한) get /api/notification/unread 에 접근할 수 있다.")
+    void givenStoreRole_whenAccessingUnreadNotificationEndpoint_thenAllowAccess() throws Exception {
         // Given
-        String invalidAccessToken = "invalid-access-token";
-        when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(invalidAccessToken);
-        when(jwtProvider.validateAccessToken(invalidAccessToken)).thenThrow(new TokenInvalidException("Token is invalid"));
+        String accessToken = "valid-access-token";
+
+        when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(accessToken);
+        when(jwtProvider.validateAccessToken(accessToken)).thenReturn(true);
+        when(jwtProvider.getSubjectFromAccessToken(accessToken)).thenReturn(TEST_STORE_ID);
+        when(jwtProvider.getRoleFromAccessToken(accessToken)).thenReturn("STORE");
+
+        when(notificationController.getUnreadNotifications())
+                .thenReturn(ResponseEntity.ok().build());
 
         // When & Then
-        mockMvc.perform(post("/api/users/users")
-                                .header("Authorization", "Bearer " + invalidAccessToken))
-               .andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/api/notification/unread")
+                                .header("Authorization", "Bearer " + accessToken))
+               .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Store 권한이 없는 경우(ex USER 권한) get /api/notification/unread 에 접근할 수 없다.")
+    void givenNotStoreRole_whenAccessingUnreadNotificationEndpoint_thenInaccessible() throws Exception {
+        // Given
+        String accessToken = "valid-access-token";
+
+        when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(accessToken);
+        when(jwtProvider.validateAccessToken(accessToken)).thenReturn(true);
+        when(jwtProvider.getSubjectFromAccessToken(accessToken)).thenReturn(TEST_STORE_ID);
+        when(jwtProvider.getRoleFromAccessToken(accessToken)).thenReturn("USER");
+
+        // When & Then
+        mockMvc.perform(get("/api/notification/unread")
+                                .header("Authorization", "Bearer " + accessToken))
+               .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Store 권한이 있는 경우(ex USER 권한) get /api/notification 에 접근할 수 있다.")
+    void givenStoreRole_whenAccessingAllNotificationEndpoint_thenAllowAccess() throws Exception {
+        // Given
+        String accessToken = "valid-access-token";
+
+        when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(accessToken);
+        when(jwtProvider.validateAccessToken(accessToken)).thenReturn(true);
+        when(jwtProvider.getSubjectFromAccessToken(accessToken)).thenReturn(TEST_STORE_ID);
+        when(jwtProvider.getRoleFromAccessToken(accessToken)).thenReturn("STORE");
+
+        when(notificationController.getAllNotifications())
+                .thenReturn(ResponseEntity.ok().build());
+
+        // When & Then
+        mockMvc.perform(get("/api/notification")
+                                .header("Authorization", "Bearer " + accessToken))
+               .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Store 권한이 없는 경우(ex USER 권한) get /api/notification 에 접근할 수 없다.")
+    void givenNotStoreRole_whenAccessingAllNotificationEndpoint_thenInaccessible() throws Exception {
+        // Given
+        String accessToken = "valid-access-token";
+
+        when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(accessToken);
+        when(jwtProvider.validateAccessToken(accessToken)).thenReturn(true);
+        when(jwtProvider.getSubjectFromAccessToken(accessToken)).thenReturn(TEST_STORE_ID);
+        when(jwtProvider.getRoleFromAccessToken(accessToken)).thenReturn("USER");
+
+        // When & Then
+        mockMvc.perform(get("/api/notification")
+                                .header("Authorization", "Bearer " + accessToken))
+               .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Store 권한이 있는 경우(ex USER 권한) post /api/notification/{notificationId} 에 접근할 수 있다.")
+    void givenStoreRole_whenAccessingMarkNotificationAsReadEndpoint_thenAllowAccess() throws Exception {
+        // Given
+        String accessToken = "valid-access-token";
+
+        when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(accessToken);
+        when(jwtProvider.validateAccessToken(accessToken)).thenReturn(true);
+        when(jwtProvider.getSubjectFromAccessToken(accessToken)).thenReturn(TEST_STORE_ID);
+        when(jwtProvider.getRoleFromAccessToken(accessToken)).thenReturn("STORE");
+
+        when(notificationController.markNotificationAsRead(1L))
+                .thenReturn(ResponseEntity.ok().build());
+
+        // When & Then
+        mockMvc.perform(patch("/api/notification/1")
+                                .header("Authorization", "Bearer " + accessToken))
+               .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Store 권한이 없는 경우(ex USER 권한) post /api/notification/{notificationId} 에 접근할 수 없다.")
+    void givenNotStoreRole_whenAccessingMarkNotificationAsReadEndpoint_thenInaccessible() throws Exception {
+        // Given
+        String accessToken = "valid-access-token";
+
+        when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(accessToken);
+        when(jwtProvider.validateAccessToken(accessToken)).thenReturn(true);
+        when(jwtProvider.getSubjectFromAccessToken(accessToken)).thenReturn(TEST_STORE_ID);
+        when(jwtProvider.getRoleFromAccessToken(accessToken)).thenReturn("USER");
+
+        // When & Then
+        mockMvc.perform(patch("/api/notification/1")
+                                .header("Authorization", "Bearer " + accessToken))
+               .andExpect(status().isForbidden());
     }
 }

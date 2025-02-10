@@ -43,8 +43,9 @@ public class Orders {
     @Column(nullable = false)
     private LocalDateTime orderDate;
 
-    @Column(nullable = false, length = 20)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20, columnDefinition = "VARCHAR(20) CHECK (status IN ('PENDING', 'SHIPPED', 'DELIVERED', 'CANCELED'))")
+    private OrderStatus status;
 
     @Column(nullable = false)
     private String deliveryAddress;
@@ -55,6 +56,6 @@ public class Orders {
     @PrePersist
     public void prePersist() {
         orderDate = (orderDate == null) ? LocalDateTime.now() : orderDate;
-        status = (status == null) ? "준비중" : status;
+        status = (status == null) ? OrderStatus.PENDING : status;
     }
 }

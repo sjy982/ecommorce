@@ -104,6 +104,7 @@ public class SecurityConfig  {
                         .requestMatchers(HttpMethod.POST, "api/cart/items/order").hasRole(UserRole.USER.name())
                         .requestMatchers("api/admin/**").hasRole(UserRole.ADMIN.name())
                         .requestMatchers(HttpMethod.POST, "api/product").hasRole(UserRole.STORE.name())
+                        .requestMatchers("api/notification/**").hasRole(UserRole.STORE.name())
                         .anyRequest().permitAll())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JwtExceptionFilter(objectMapper), JwtAuthenticationFilter.class);

@@ -16,6 +16,8 @@ import com.ecommerce.cart.model.Cart;
 import com.ecommerce.cart.repository.CartRepository;
 import com.ecommerce.category.model.Category;
 import com.ecommerce.category.repository.CategoryRepository;
+import com.ecommerce.notification.model.Notification;
+import com.ecommerce.notification.repository.NotificationRepository;
 import com.ecommerce.order.DTO.OrderProductRequestDto;
 import com.ecommerce.order.DTO.OrderProductResponseDto;
 import com.ecommerce.order.model.Orders;
@@ -26,9 +28,6 @@ import com.ecommerce.store.model.Store;
 import com.ecommerce.store.repository.StoreRepository;
 import com.ecommerce.user.model.Users;
 import com.ecommerce.user.repository.UserRepository;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -53,6 +52,9 @@ class OrderServiceTest {
 
     @Autowired
     private CartRepository cartRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     private Users user;
     private Product product;
@@ -126,10 +128,13 @@ class OrderServiceTest {
         List<Orders> newOrder = orderRepository.findAllByUserProviderId(user.getProviderId());
         Product updatedProduct = productRepository.findById(product.getId()).get();
         Store updatedStore = storeRepository.findById(store.getId()).get();
+        List<Notification> newNotifications = notificationRepository.findByStoreIdOrderByCreatedAtDesc(store.getId());
 
         assertEquals(newOrder.get(0).getProduct().getId(), updatedProduct.getId());
         assertEquals(newOrder.get(0).getStore().getId(), updatedStore.getId());
         assertEquals(newOrder.get(0).getUser().getProviderId(), user.getProviderId());
+        assertEquals(newNotifications.get(0).getStore().getId(), updatedStore.getId());
+        assertEquals(newNotifications.get(0).getOrder().getId(), newOrder.get(0).getId());
 
         // 업데이트 된 stock, totalSales 검사
         assertEquals(10, updatedProduct.getStock());
