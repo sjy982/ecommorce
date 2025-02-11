@@ -50,21 +50,38 @@ public class OrderService {
                              .build();
 
         orderRepository.save(order);
-        notificationService.createNotification(order.getStore(), order);
+        notificationService.createNotification(order);
 
-        OrderProductResponseDto responseDto = OrderProductResponseDto.builder()
-                .orderProduct(OrderProductDto.builder()
-                                             .name(order.getProduct().getName())
-                                             .price(order.getProduct().getPrice())
-                                             .quantity(order.getQuantity()).build())
-                .deliveryAddress(order.getDeliveryAddress())
-                .phoneNumber(order.getPhoneNumber()).build();
-
-        return responseDto;
+        return convertOrdersToOrderProductResponse(order);
     }
 
-    public Orders findByIdOrder(Long orderId) {
-        Orders order = orderRepository.findById(orderId).orElseThrow(() -> new UsernameNotFoundException("order not found"));
-        return order;
+//    public OrderProductResponseDto getUserOrderProductResponseDto(Long orderId, String providerId) {
+//        Orders order = findByIdAndProviderId(orderId, providerId);
+//        return convertOrdersToOrderProductResponse(order);
+//    }
+//
+//    public OrderProductResponseDto getStoreOrderProductResponseDto(Long orderId, Long storeId) {
+//        Orders order = findByIdAndStoreId(orderId, storeId);
+//        return convertOrdersToOrderProductResponse(order);
+//    }
+
+    private static OrderProductResponseDto convertOrdersToOrderProductResponse(Orders order) {
+        return OrderProductResponseDto.builder()
+                                      .orderProduct(OrderProductDto.builder()
+                                                            .name(order.getProduct().getName())
+                                                            .price(order.getProduct().getPrice())
+                                                            .quantity(order.getQuantity()).build())
+                                      .deliveryAddress(order.getDeliveryAddress())
+                               .phoneNumber(order.getPhoneNumber()).build();
     }
+
+//    private  Orders findByIdAndProviderId(Long orderId, String providerId) {
+//        Orders order = orderRepository.findByIdAndProviderId(orderId, providerId).orElseThrow(() -> new UsernameNotFoundException("order not found"));
+//        return order;
+//    }
+//
+//    private  Orders findByIdAndStoreId(Long orderId, Long storeId) {
+//        Orders order = orderRepository.findByIdAndStoreId(orderId, storeId).orElseThrow(() -> new UsernameNotFoundException("order not found"));
+//        return order;
+//    }
 }

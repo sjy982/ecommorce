@@ -29,10 +29,6 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "storeId", nullable = false)
-    private Store store;
-
     @OneToOne
     @JoinColumn(name = "orderId", nullable = false)
     private Orders order;

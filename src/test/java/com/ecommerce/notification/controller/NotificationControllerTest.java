@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.ecommerce.notification.dto.NotificationResponseDto;
 import com.ecommerce.notification.model.Notification;
+import com.ecommerce.notification.projection.NotificationProjection;
 import com.ecommerce.notification.service.NotificationService;
 import com.ecommerce.order.model.OrderStatus;
 import com.ecommerce.order.model.Orders;
@@ -50,19 +51,29 @@ class NotificationControllerTest {
     @DisplayName("api/notification/unread 요청하면 확인되지 않음 모든 알림을 응답으로 받는다.")
     void givenValidStoreUser_whenGetUnreadNotifications_thenShouldReturnIsReadFalseNotifications() throws Exception {
         // Given
-        List<NotificationResponseDto> notifications = List.of(
-                NotificationResponseDto.builder()
-                                       .id(0L)
-                                       .orderId(0L)
-                                       .orderStatus(OrderStatus.PENDING)
-                                       .createdAt(LocalDateTime.now()).build(),
-
-                NotificationResponseDto.builder()
-                                       .id(1L)
-                                       .orderId(1L)
-                                       .orderStatus(OrderStatus.PENDING)
-                                       .createdAt(LocalDateTime.now()).build()
+        List<NotificationProjection> notifications = List.of(
+                new NotificationProjection() {
+                    @Override
+                    public Long getId() { return 0L; }
+                    @Override
+                    public Long getOrderId() { return 0L; }
+                    @Override
+                    public OrderStatus getOrderStatus() { return OrderStatus.PENDING; }
+                    @Override
+                    public LocalDateTime getCreatedAt() { return LocalDateTime.now(); }
+                },
+                new NotificationProjection() {
+                    @Override
+                    public Long getId() { return 1L; }
+                    @Override
+                    public Long getOrderId() { return 1L; }
+                    @Override
+                    public OrderStatus getOrderStatus() { return OrderStatus.PENDING; }
+                    @Override
+                    public LocalDateTime getCreatedAt() { return LocalDateTime.now(); }
+                }
         );
+
 
         when(notificationService.getUnReadNotifications(1L)).thenReturn(notifications);
 
@@ -82,18 +93,27 @@ class NotificationControllerTest {
     @DisplayName("api/notification 요청하면 모든 알림을 응답으로 받는다.")
     void givenValidStoreUser_whenGetAllNotifications_thenShouldReturnAllNotifications() throws Exception {
         // Given
-        List<NotificationResponseDto> notifications = List.of(
-                NotificationResponseDto.builder()
-                                       .id(0L)
-                                       .orderId(0L)
-                                       .orderStatus(OrderStatus.PENDING)
-                                       .createdAt(LocalDateTime.now()).build(),
-
-                NotificationResponseDto.builder()
-                                       .id(1L)
-                                       .orderId(1L)
-                                       .orderStatus(OrderStatus.PENDING)
-                                       .createdAt(LocalDateTime.now()).build()
+        List<NotificationProjection> notifications = List.of(
+                new NotificationProjection() {
+                    @Override
+                    public Long getId() { return 0L; }
+                    @Override
+                    public Long getOrderId() { return 0L; }
+                    @Override
+                    public OrderStatus getOrderStatus() { return OrderStatus.PENDING; }
+                    @Override
+                    public LocalDateTime getCreatedAt() { return LocalDateTime.now(); }
+                },
+                new NotificationProjection() {
+                    @Override
+                    public Long getId() { return 1L; }
+                    @Override
+                    public Long getOrderId() { return 1L; }
+                    @Override
+                    public OrderStatus getOrderStatus() { return OrderStatus.PENDING; }
+                    @Override
+                    public LocalDateTime getCreatedAt() { return LocalDateTime.now(); }
+                }
         );
 
         when(notificationService.getAllNotifications(1L)).thenReturn(notifications);
