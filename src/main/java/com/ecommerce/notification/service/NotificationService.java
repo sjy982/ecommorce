@@ -4,7 +4,9 @@ import java.util.List;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.ecommerce.notification.dto.NotificationResponseDto;
 import com.ecommerce.notification.model.Notification;
 import com.ecommerce.notification.repository.NotificationRepository;
 import com.ecommerce.order.model.Orders;
@@ -26,19 +28,30 @@ public class NotificationService {
                                                    .build());
     }
 
-    public List<Notification> getUnReadNotifications(Long storeId) {
-        return notificationRepository.findByStoreIdAndIsReadFalseOrderByCreatedAtDesc(storeId);
+    public List<NotificationResponseDto> getUnReadNotifications(Long storeId) {
+        List<Notification> unReadNotifications = notificationRepository.findByStoreIdAndIsReadFalseOrderByCreatedAtDesc(storeId);
+        return unReadNotifications.stream()
+                            .map(notification -> NotificationResponseDto.builder()
+                                                                        .id(notification.getId())
+                                                                        .orderId(notification.getOrder().getId())
+                                                                        .orderStatus(notification.getOrder().getStatus())
+                                                                        .createdAt(notification.getCreatedAt()).build()).toList();
     }
 
-    public List<Notification> getAllNotifications(Long storeId) {
-        return notificationRepository.findByStoreIdOrderByCreatedAtDesc(storeId);
+    public List<NotificationResponseDto> getAllNotifications(Long storeId) {
+        List<Notification> notifications = notificationRepository.findByStoreIdOrderByCreatedAtDesc(storeId);
+        return notifications.stream()
+                            .map(notification -> NotificationResponseDto.builder()
+                                                                        .id(notification.getId())
+                                                                        .orderId(notification.getOrder().getId())
+                                                                        .orderStatus(notification.getOrder().getStatus())
+                                                                        .createdAt(notification.getCreatedAt()).build()).toList();
     }
 
     public void markAsRead(Long notificationId) {
-        Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new UsernameNotFoundException("notification not found"));
-
-        notification.setIsRead(true);
-        notificationRepository.save(notification);
+        int updatedCount = notificationRepository.markAsRead(notificationId);
+        if(updatedCount == 0) {
+            throw new UsernameNotFoundException("해당 알림을 찾을 수 없습니다.");
+        }
     }
 }

@@ -30,13 +30,7 @@ public class NotificationController {
     @GetMapping("/unread")
     public ResponseEntity<ApiResponse<List<NotificationResponseDto>>> getUnreadNotifications() {
         Long storeId = Long.parseLong((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-        List<Notification> notifications = notificationService.getUnReadNotifications(storeId);
-        List<NotificationResponseDto> responseDtoList = notifications.stream()
-                .map(notification -> NotificationResponseDto.builder()
-                        .id(notification.getId())
-                        .orderId(notification.getOrder().getId())
-                        .orderStatus(notification.getOrder().getStatus())
-                        .createdAt(notification.getCreatedAt()).build()).toList();
+        List<NotificationResponseDto> responseDtoList = notificationService.getUnReadNotifications(storeId);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponseUtil.createResponse(HttpStatus.OK.value(), responseDtoList, "success"));
@@ -45,13 +39,7 @@ public class NotificationController {
     @GetMapping
     public ResponseEntity<ApiResponse<List<NotificationResponseDto>>> getAllNotifications() {
         Long storeId = Long.parseLong((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-        List<Notification> notifications = notificationService.getAllNotifications(storeId);
-        List<NotificationResponseDto> responseDtoList = notifications.stream()
-                .map(notification -> NotificationResponseDto.builder()
-                        .id(notification.getId())
-                        .orderId(notification.getOrder().getId())
-                        .orderStatus(notification.getOrder().getStatus())
-                        .createdAt(notification.getCreatedAt()).build()).toList();
+        List<NotificationResponseDto> responseDtoList = notificationService.getAllNotifications(storeId);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponseUtil.createResponse(HttpStatus.OK.value(), responseDtoList, "success"));

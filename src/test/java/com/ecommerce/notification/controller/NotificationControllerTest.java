@@ -23,6 +23,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.ecommerce.notification.dto.NotificationResponseDto;
 import com.ecommerce.notification.model.Notification;
 import com.ecommerce.notification.service.NotificationService;
 import com.ecommerce.order.model.OrderStatus;
@@ -49,22 +50,18 @@ class NotificationControllerTest {
     @DisplayName("api/notification/unread 요청하면 확인되지 않음 모든 알림을 응답으로 받는다.")
     void givenValidStoreUser_whenGetUnreadNotifications_thenShouldReturnIsReadFalseNotifications() throws Exception {
         // Given
-        List<Notification> notifications = List.of(
-          Notification.builder()
-                      .id(0L)
-                      .store(Store.builder().id(0L).build())
-                      .order(Orders.builder().id(0L)
-                                     .status(OrderStatus.PENDING).build())
-                      .createdAt(LocalDateTime.now())
-                      .isRead(false).build(),
+        List<NotificationResponseDto> notifications = List.of(
+                NotificationResponseDto.builder()
+                                       .id(0L)
+                                       .orderId(0L)
+                                       .orderStatus(OrderStatus.PENDING)
+                                       .createdAt(LocalDateTime.now()).build(),
 
-          Notification.builder()
-                      .id(1L)
-                      .store(Store.builder().id(1L).build())
-                      .order(Orders.builder().id(1L)
-                                   .status(OrderStatus.PENDING).build())
-                      .createdAt(LocalDateTime.now())
-                      .isRead(false).build()
+                NotificationResponseDto.builder()
+                                       .id(1L)
+                                       .orderId(1L)
+                                       .orderStatus(OrderStatus.PENDING)
+                                       .createdAt(LocalDateTime.now()).build()
         );
 
         when(notificationService.getUnReadNotifications(1L)).thenReturn(notifications);
@@ -85,22 +82,18 @@ class NotificationControllerTest {
     @DisplayName("api/notification 요청하면 모든 알림을 응답으로 받는다.")
     void givenValidStoreUser_whenGetAllNotifications_thenShouldReturnAllNotifications() throws Exception {
         // Given
-        List<Notification> notifications = List.of(
-                Notification.builder()
-                            .id(0L)
-                            .store(Store.builder().id(0L).build())
-                            .order(Orders.builder().id(0L)
-                                         .status(OrderStatus.PENDING).build())
-                            .createdAt(LocalDateTime.now())
-                            .isRead(false).build(),
+        List<NotificationResponseDto> notifications = List.of(
+                NotificationResponseDto.builder()
+                                       .id(0L)
+                                       .orderId(0L)
+                                       .orderStatus(OrderStatus.PENDING)
+                                       .createdAt(LocalDateTime.now()).build(),
 
-                Notification.builder()
-                            .id(1L)
-                            .store(Store.builder().id(1L).build())
-                            .order(Orders.builder().id(1L)
-                                         .status(OrderStatus.PENDING).build())
-                            .createdAt(LocalDateTime.now())
-                            .isRead(false).build()
+                NotificationResponseDto.builder()
+                                       .id(1L)
+                                       .orderId(1L)
+                                       .orderStatus(OrderStatus.PENDING)
+                                       .createdAt(LocalDateTime.now()).build()
         );
 
         when(notificationService.getAllNotifications(1L)).thenReturn(notifications);
