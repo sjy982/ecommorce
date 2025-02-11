@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ecommerce.notification.dto.NotificationResponseDto;
 import com.ecommerce.notification.model.Notification;
+import com.ecommerce.notification.projection.NotificationProjection;
 import com.ecommerce.notification.repository.NotificationRepository;
 import com.ecommerce.order.model.Orders;
 import com.ecommerce.order.service.OrderService;
@@ -21,35 +22,24 @@ import lombok.RequiredArgsConstructor;
 public class NotificationService {
     private final NotificationRepository notificationRepository;
 
-    public Notification createNotification(Store store, Orders order) {
+    public Notification createNotification(Orders order) {
         return notificationRepository.save(Notification.builder()
-                                                   .store(store)
                                                    .order(order)
                                                    .build());
     }
 
-    public List<NotificationResponseDto> getUnReadNotifications(Long storeId) {
-        List<Notification> unReadNotifications = notificationRepository.findByStoreIdAndIsReadFalseOrderByCreatedAtDesc(storeId);
-        return unReadNotifications.stream()
-                            .map(notification -> NotificationResponseDto.builder()
-                                                                        .id(notification.getId())
-                                                                        .orderId(notification.getOrder().getId())
-                                                                        .orderStatus(notification.getOrder().getStatus())
-                                                                        .createdAt(notification.getCreatedAt()).build()).toList();
+    public List<NotificationProjection> getUnReadNotifications(Long storeId) {
+        List<NotificationProjection> unReadNotifications = notificationRepository.findUnreadNotificationsByStoreId(storeId);
+        return unReadNotifications;
     }
 
-    public List<NotificationResponseDto> getAllNotifications(Long storeId) {
-        List<Notification> notifications = notificationRepository.findByStoreIdOrderByCreatedAtDesc(storeId);
-        return notifications.stream()
-                            .map(notification -> NotificationResponseDto.builder()
-                                                                        .id(notification.getId())
-                                                                        .orderId(notification.getOrder().getId())
-                                                                        .orderStatus(notification.getOrder().getStatus())
-                                                                        .createdAt(notification.getCreatedAt()).build()).toList();
+    public List<NotificationProjection> getAllNotifications(Long storeId) {
+        List<NotificationProjection> notifications = notificationRepository.findNotificationsByStoreId(storeId);
+        return notifications;
     }
 
-    public void markAsRead(Long notificationId) {
-        int updatedCount = notificationRepository.markAsRead(notificationId);
+    public void markAsRead(Long notificationId, Long storeId) {
+        int updatedCount = notificationRepository.markAsRead(notificationId, storeId);
         if(updatedCount == 0) {
             throw new UsernameNotFoundException("해당 알림을 찾을 수 없습니다.");
         }

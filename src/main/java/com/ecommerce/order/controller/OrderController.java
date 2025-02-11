@@ -3,6 +3,7 @@ package com.ecommerce.order.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,4 +32,14 @@ public class OrderController {
                 .status(HttpStatus.OK)
                 .body(ApiResponseUtil.createResponse(HttpStatus.OK.value(), responseDto, "order success"));
     }
+
+//    @GetMapping("/user/{orderId}")
+//    public ResponseEntity<ApiResponse<OrderProductResponseDto>> getOrder() {
+//        String providerId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//    }
+//
+//    @GetMapping("/store/{orderId}")
+//    public ResponseEntity<ApiResponse<OrderProductResponseDto>> getOrder() {
+//        String providerId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//    }
 }

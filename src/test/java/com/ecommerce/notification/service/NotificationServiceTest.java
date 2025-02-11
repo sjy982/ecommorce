@@ -1,6 +1,7 @@
 package com.ecommerce.notification.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +20,7 @@ import com.ecommerce.category.model.Category;
 import com.ecommerce.category.repository.CategoryRepository;
 import com.ecommerce.notification.dto.NotificationResponseDto;
 import com.ecommerce.notification.model.Notification;
+import com.ecommerce.notification.projection.NotificationProjection;
 import com.ecommerce.notification.repository.NotificationRepository;
 import com.ecommerce.order.DTO.OrderProductRequestDto;
 
@@ -137,26 +140,51 @@ class NotificationServiceTest {
         orderService.orderProduct(user.getProviderId(), requestDto2);
         orderService.orderProduct(user.getProviderId(), requestDto3);
 
-        List<NotificationResponseDto> allNotifications = notificationService.getAllNotifications(product.getStore().getId());
+        List<NotificationProjection> allNotifications = notificationService.getAllNotifications(product.getStore().getId());
         assertEquals(allNotifications.get(0).getCreatedAt().isAfter(allNotifications.get(1).getCreatedAt()), true);
 
-        notificationService.markAsRead(allNotifications.get(2).getId());
+        notificationService.markAsRead(allNotifications.get(2).getId(), store.getId());
 
-        List<NotificationResponseDto> unReadNotifications = notificationService.getUnReadNotifications(product.getStore().getId());
-        List<Notification> isReadFalseNotifications = notificationRepository.findByStoreIdAndIsReadFalseOrderByCreatedAtDesc(product.getStore().getId());
-        assertEquals(unReadNotifications.get(0).getId(), isReadFalseNotifications.get(0).getId());
-        assertEquals(unReadNotifications.get(1).getId(), isReadFalseNotifications.get(1).getId());
+        List<NotificationProjection> unReadNotifications = notificationService.getUnReadNotifications(product.getStore().getId());
 
-        assertEquals(isReadFalseNotifications.size(), 2);
-        assertEquals(isReadFalseNotifications.get(0).getIsRead(), false);
-        assertEquals(isReadFalseNotifications.get(1).getIsRead(), false);
-        assertEquals(isReadFalseNotifications.get(0).getStore().getId(), product.getStore().getId());
-        assertEquals(isReadFalseNotifications.get(1).getStore().getId(), product.getStore().getId());
+        assertEquals(unReadNotifications.size(), 2);
+
+        Notification unReadNotification0 = notificationRepository.findById(unReadNotifications.get(0).getId()).get();
+        Notification unReadNotification1 = notificationRepository.findById(unReadNotifications.get(1).getId()).get();
+
+
+        assertEquals(unReadNotification0.getIsRead(), false);
+        assertEquals(unReadNotification1.getIsRead(), false);
+        assertEquals(unReadNotification0.getOrder().getStore().getId(), product.getStore().getId());
+        assertEquals(unReadNotification1.getOrder().getStore().getId(), product.getStore().getId());
 
         List<Orders> newOrder = orderRepository.findAllByUserProviderId(user.getProviderId());
-        assertEquals(isReadFalseNotifications.get(0).getOrder().getId(), newOrder.get(2).getId());
-        assertEquals(isReadFalseNotifications.get(1).getOrder().getId(), newOrder.get(1).getId());
+        assertEquals(unReadNotification0.getOrder().getId(), newOrder.get(2).getId());
+        assertEquals(unReadNotification1.getOrder().getId(), newOrder.get(1).getId());
 
-        assertEquals(isReadFalseNotifications.get(0).getOrder().getOrderDate().isAfter(isReadFalseNotifications.get(1).getOrder().getOrderDate()), true);
+        assertEquals(unReadNotifications.get(0).getCreatedAt().isAfter(unReadNotifications.get(1).getCreatedAt()), true);
+    }
+
+    @Test
+    @DisplayName("확인하려는 Notification이 Store의 알림이 아닌 경우 업데이트가 되지 않아야 한다.")
+    @Transactional
+    void givenStoreIdNotEqualNotificationStoreId_whenMarkAsRead_thenShouldNotUpdate() {
+        // Given
+        OrderProductRequestDto requestDto1 = OrderProductRequestDto.builder()
+                                                                   .productId(product.getId())
+                                                                   .quantity(10)
+                                                                   .deliveryAddress("test Address")
+                                                                   .phoneNumber("010-1234-1234").build();
+        // When && Then
+        orderService.orderProduct(user.getProviderId(), requestDto1);
+        List<NotificationProjection> allNotifications = notificationService.getAllNotifications(product.getStore().getId());
+        Notification unReadNotification = notificationRepository.findById(allNotifications.get(0).getId()).get();
+
+        assertThrows(UsernameNotFoundException.class, () ->
+                notificationService.markAsRead(
+                        unReadNotification.getId(),
+                        unReadNotification.getOrder().getStore().getId() + 1
+                )
+        );
     }
 }
