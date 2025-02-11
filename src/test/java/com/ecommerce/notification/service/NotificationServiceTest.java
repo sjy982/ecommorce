@@ -16,10 +16,11 @@ import com.ecommerce.cart.model.Cart;
 import com.ecommerce.cart.repository.CartRepository;
 import com.ecommerce.category.model.Category;
 import com.ecommerce.category.repository.CategoryRepository;
+import com.ecommerce.notification.dto.NotificationResponseDto;
 import com.ecommerce.notification.model.Notification;
 import com.ecommerce.notification.repository.NotificationRepository;
 import com.ecommerce.order.DTO.OrderProductRequestDto;
-import com.ecommerce.order.DTO.OrderProductResponseDto;
+
 import com.ecommerce.order.model.Orders;
 import com.ecommerce.order.repository.OrderRepository;
 import com.ecommerce.order.service.OrderService;
@@ -136,12 +137,16 @@ class NotificationServiceTest {
         orderService.orderProduct(user.getProviderId(), requestDto2);
         orderService.orderProduct(user.getProviderId(), requestDto3);
 
-        List<Notification> allNotifications = notificationService.getAllNotifications(product.getStore().getId());
-        assertEquals(allNotifications.get(0).getOrder().getOrderDate().isAfter(allNotifications.get(1).getOrder().getOrderDate()), true);
+        List<NotificationResponseDto> allNotifications = notificationService.getAllNotifications(product.getStore().getId());
+        assertEquals(allNotifications.get(0).getCreatedAt().isAfter(allNotifications.get(1).getCreatedAt()), true);
 
         notificationService.markAsRead(allNotifications.get(2).getId());
 
+        List<NotificationResponseDto> unReadNotifications = notificationService.getUnReadNotifications(product.getStore().getId());
         List<Notification> isReadFalseNotifications = notificationRepository.findByStoreIdAndIsReadFalseOrderByCreatedAtDesc(product.getStore().getId());
+        assertEquals(unReadNotifications.get(0).getId(), isReadFalseNotifications.get(0).getId());
+        assertEquals(unReadNotifications.get(1).getId(), isReadFalseNotifications.get(1).getId());
+
         assertEquals(isReadFalseNotifications.size(), 2);
         assertEquals(isReadFalseNotifications.get(0).getIsRead(), false);
         assertEquals(isReadFalseNotifications.get(1).getIsRead(), false);
