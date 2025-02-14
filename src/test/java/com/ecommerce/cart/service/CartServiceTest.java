@@ -236,17 +236,17 @@ class CartServiceTest {
         CartItemsOrderResponseDto cartItemsOrderResponseDto = cartService.cartItemsOrder(user.getProviderId(), cartItemsOrderRequestDto);
         OrderProductDto orderProductDto1 = cartItemsOrderResponseDto.getOrderProducts().get(0);
         OrderProductDto orderProductDto2 = cartItemsOrderResponseDto.getOrderProducts().get(1);
-        List<Orders> orders = orderRepository.findAllByUserProviderId(user.getProviderId());
+        List<Orders> orders = orderRepository.findAllByUserProviderIdOrderByOrderDateDesc(user.getProviderId());
         List<CartItem> cartItems = cartItemRepository.findByIdIn(cartItemIds);
 
         // Then
         assertEquals(product.getName(), orderProductDto1.getName());
         assertEquals(product.getPrice(), orderProductDto1.getPrice());
-        assertEquals(orders.get(0).getQuantity(), orderProductDto1.getQuantity());
+        assertEquals(orders.get(1).getQuantity(), orderProductDto1.getQuantity());
 
         assertEquals(product2.getName(), orderProductDto2.getName());
         assertEquals(product2.getPrice(), orderProductDto2.getPrice());
-        assertEquals(orders.get(1).getQuantity(), orderProductDto2.getQuantity());
+        assertEquals(orders.get(0).getQuantity(), orderProductDto2.getQuantity());
 
         assertEquals(List.of(), cartItems);
     }

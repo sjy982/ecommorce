@@ -1,5 +1,7 @@
 package com.ecommerce.order.service;
 
+import java.util.List;
+
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,15 +57,27 @@ public class OrderService {
         return convertOrdersToOrderProductResponse(order);
     }
 
-//    public OrderProductResponseDto getUserOrderProductResponseDto(Long orderId, String providerId) {
-//        Orders order = findByIdAndProviderId(orderId, providerId);
-//        return convertOrdersToOrderProductResponse(order);
-//    }
-//
-//    public OrderProductResponseDto getStoreOrderProductResponseDto(Long orderId, Long storeId) {
-//        Orders order = findByIdAndStoreId(orderId, storeId);
-//        return convertOrdersToOrderProductResponse(order);
-//    }
+    public List<OrderProductResponseDto> getUserAllOrderProductsResponseDto(String providerId) {
+        List<Orders> orders = orderRepository.findAllByUserProviderIdOrderByOrderDateDesc(providerId);
+        return orders.stream()
+                .map((order) -> convertOrdersToOrderProductResponse(order)).toList();
+    }
+
+    public List<OrderProductResponseDto> getStoreAllOrderProductsResponseDto(Long storeId) {
+        List<Orders> orders = orderRepository.findAllByStoreIdOrderByOrderDateDesc(storeId);
+        return orders.stream()
+                .map((order) -> convertOrdersToOrderProductResponse(order)).toList();
+    }
+
+    public OrderProductResponseDto getUserOrderProductResponseDto(Long orderId, String providerId) {
+        Orders order = findByIdAndProviderId(orderId, providerId);
+        return convertOrdersToOrderProductResponse(order);
+    }
+
+    public OrderProductResponseDto getStoreOrderProductResponseDto(Long orderId, Long storeId) {
+        Orders order = findByIdAndStoreId(orderId, storeId);
+        return convertOrdersToOrderProductResponse(order);
+    }
 
     private static OrderProductResponseDto convertOrdersToOrderProductResponse(Orders order) {
         return OrderProductResponseDto.builder()
@@ -75,13 +89,13 @@ public class OrderService {
                                .phoneNumber(order.getPhoneNumber()).build();
     }
 
-//    private  Orders findByIdAndProviderId(Long orderId, String providerId) {
-//        Orders order = orderRepository.findByIdAndProviderId(orderId, providerId).orElseThrow(() -> new UsernameNotFoundException("order not found"));
-//        return order;
-//    }
-//
-//    private  Orders findByIdAndStoreId(Long orderId, Long storeId) {
-//        Orders order = orderRepository.findByIdAndStoreId(orderId, storeId).orElseThrow(() -> new UsernameNotFoundException("order not found"));
-//        return order;
-//    }
+    private  Orders findByIdAndProviderId(Long orderId, String providerId) {
+        Orders order = orderRepository.findByIdAndProviderId(orderId, providerId).orElseThrow(() -> new UsernameNotFoundException("order not found"));
+        return order;
+    }
+
+    private  Orders findByIdAndStoreId(Long orderId, Long storeId) {
+        Orders order = orderRepository.findByIdAndStoreId(orderId, storeId).orElseThrow(() -> new UsernameNotFoundException("order not found"));
+        return order;
+    }
 }

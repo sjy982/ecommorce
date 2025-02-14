@@ -158,8 +158,8 @@ class NotificationServiceTest {
         assertEquals(unReadNotification0.getOrder().getStore().getId(), product.getStore().getId());
         assertEquals(unReadNotification1.getOrder().getStore().getId(), product.getStore().getId());
 
-        List<Orders> newOrder = orderRepository.findAllByUserProviderId(user.getProviderId());
-        assertEquals(unReadNotification0.getOrder().getId(), newOrder.get(2).getId());
+        List<Orders> newOrder = orderRepository.findAllByUserProviderIdOrderByOrderDateDesc(user.getProviderId());
+        assertEquals(unReadNotification0.getOrder().getId(), newOrder.get(0).getId());
         assertEquals(unReadNotification1.getOrder().getId(), newOrder.get(1).getId());
 
         assertEquals(unReadNotifications.get(0).getCreatedAt().isAfter(unReadNotifications.get(1).getCreatedAt()), true);
