@@ -2,6 +2,8 @@ package com.ecommerce.config;
 
 import static com.ecommerce.config.TestConstants.TEST_PROVIDER_ID;
 import static com.ecommerce.config.TestConstants.TEST_STORE_ID;
+import static com.ecommerce.config.TestConstants.TEST_STORE_ROLE;
+import static com.ecommerce.config.TestConstants.TEST_USER_ROLE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -507,6 +509,158 @@ class SecurityConfigTest {
 
         // When & Then
         mockMvc.perform(patch("/api/notification/1")
+                                .header("Authorization", "Bearer " + accessToken))
+               .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Store 권한이 있는 경우 get /api/orders/store/{orderId} 에 접근할 수 있다.")
+    void givenStoreRole_whenAccessingGetStoreOrderEndpoint_thenAccessible() throws Exception {
+        // Given
+        String accessToken = "valid-access-token";
+
+        when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(accessToken);
+        when(jwtProvider.validateAccessToken(accessToken)).thenReturn(true);
+        when(jwtProvider.getSubjectFromAccessToken(accessToken)).thenReturn(TEST_STORE_ID);
+        when(jwtProvider.getRoleFromAccessToken(accessToken)).thenReturn(TEST_STORE_ROLE);
+
+        // When & Then
+        when(orderController.getStoreOrder(1L))
+                .thenReturn(ResponseEntity.ok().build());
+
+        mockMvc.perform(get("/api/orders/store/1")
+                                .header("Authorization", "Bearer " + accessToken))
+               .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Store 권한이 없는 경우 get /api/orders/store/{orderId} 에 접근할 수 없다.")
+    void givenNotStoreRole_whenAccessingGetStoreOrderEndpoint_thenInaccessible() throws Exception {
+        // Given
+        String accessToken = "valid-access-token";
+
+        when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(accessToken);
+        when(jwtProvider.validateAccessToken(accessToken)).thenReturn(true);
+        when(jwtProvider.getSubjectFromAccessToken(accessToken)).thenReturn(TEST_STORE_ID);
+        when(jwtProvider.getRoleFromAccessToken(accessToken)).thenReturn(TEST_USER_ROLE);
+
+        // When & Then
+
+        mockMvc.perform(get("/api/orders/store/1")
+                                .header("Authorization", "Bearer " + accessToken))
+               .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Store 권한이 있는 경우 get /api/orders/store 에 접근할 수 있다.")
+    void givenStoreRole_whenAccessingGetAllStoreOrdersEndpoint_thenAccessible() throws Exception {
+        // Given
+        String accessToken = "valid-access-token";
+
+        when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(accessToken);
+        when(jwtProvider.validateAccessToken(accessToken)).thenReturn(true);
+        when(jwtProvider.getSubjectFromAccessToken(accessToken)).thenReturn(TEST_STORE_ID);
+        when(jwtProvider.getRoleFromAccessToken(accessToken)).thenReturn(TEST_STORE_ROLE);
+
+        // When & Then
+        when(orderController.getAllStoreOrders())
+                .thenReturn(ResponseEntity.ok().build());
+
+        mockMvc.perform(get("/api/orders/store")
+                                .header("Authorization", "Bearer " + accessToken))
+               .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Store 권한이 없는 경우 get /api/orders/store 에 접근할 수 없다.")
+    void givenNotStoreRole_whenAccessingGetAllStoreOrdersEndpoint_thenInaccessible() throws Exception {
+        // Given
+        String accessToken = "valid-access-token";
+
+        when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(accessToken);
+        when(jwtProvider.validateAccessToken(accessToken)).thenReturn(true);
+        when(jwtProvider.getSubjectFromAccessToken(accessToken)).thenReturn(TEST_STORE_ID);
+        when(jwtProvider.getRoleFromAccessToken(accessToken)).thenReturn(TEST_USER_ROLE);
+
+        // When & Then
+
+        mockMvc.perform(get("/api/orders/store")
+                                .header("Authorization", "Bearer " + accessToken))
+               .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("User 권한이 있는 경우 get /api/orders/user/{orderId} 에 접근할 수 있다.")
+    void givenUserRole_whenAccessingGetUserOrderEndpoint_thenAccessible() throws Exception {
+        // Given
+        String accessToken = "valid-access-token";
+
+        when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(accessToken);
+        when(jwtProvider.validateAccessToken(accessToken)).thenReturn(true);
+        when(jwtProvider.getSubjectFromAccessToken(accessToken)).thenReturn(TEST_PROVIDER_ID);
+        when(jwtProvider.getRoleFromAccessToken(accessToken)).thenReturn(TEST_USER_ROLE);
+
+        // When & Then
+        when(orderController.getUserOrder(1L))
+                .thenReturn(ResponseEntity.ok().build());
+
+        mockMvc.perform(get("/api/orders/user/1")
+                                .header("Authorization", "Bearer " + accessToken))
+               .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("User 권한이 없는 경우 get /api/orders/user/{orderId} 에 접근할 수 없다.")
+    void givenNotUserRole_whenAccessingGetUserOrderEndpoint_thenInaccessible() throws Exception {
+        // Given
+        String accessToken = "valid-access-token";
+
+        when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(accessToken);
+        when(jwtProvider.validateAccessToken(accessToken)).thenReturn(true);
+        when(jwtProvider.getSubjectFromAccessToken(accessToken)).thenReturn(TEST_PROVIDER_ID);
+        when(jwtProvider.getRoleFromAccessToken(accessToken)).thenReturn(TEST_STORE_ROLE);
+
+        // When & Then
+
+        mockMvc.perform(get("/api/orders/user/1")
+                                .header("Authorization", "Bearer " + accessToken))
+               .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("User 권한이 있는 경우 get /api/orders/user 에 접근할 수 있다.")
+    void givenUserRole_whenAccessingGetAllUserOrdersEndpoint_thenAccessible() throws Exception {
+        // Given
+        String accessToken = "valid-access-token";
+
+        when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(accessToken);
+        when(jwtProvider.validateAccessToken(accessToken)).thenReturn(true);
+        when(jwtProvider.getSubjectFromAccessToken(accessToken)).thenReturn(TEST_PROVIDER_ID);
+        when(jwtProvider.getRoleFromAccessToken(accessToken)).thenReturn(TEST_USER_ROLE);
+
+        // When & Then
+        when(orderController.getAllUserOrders())
+                .thenReturn(ResponseEntity.ok().build());
+
+        mockMvc.perform(get("/api/orders/user")
+                                .header("Authorization", "Bearer " + accessToken))
+               .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("User 권한이 없는 경우 get /api/orders/user 에 접근할 수 없다.")
+    void givenNotUserRole_whenAccessingGetAllUserOrdersEndpoint_thenInaccessible() throws Exception {
+        // Given
+        String accessToken = "valid-access-token";
+
+        when(jwtProvider.resolveAccessToken(any(HttpServletRequest.class))).thenReturn(accessToken);
+        when(jwtProvider.validateAccessToken(accessToken)).thenReturn(true);
+        when(jwtProvider.getSubjectFromAccessToken(accessToken)).thenReturn(TEST_PROVIDER_ID);
+        when(jwtProvider.getRoleFromAccessToken(accessToken)).thenReturn(TEST_STORE_ROLE);
+
+        // When & Then
+
+        mockMvc.perform(get("/api/orders/user")
                                 .header("Authorization", "Bearer " + accessToken))
                .andExpect(status().isForbidden());
     }

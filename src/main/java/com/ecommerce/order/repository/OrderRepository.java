@@ -10,7 +10,8 @@ import org.springframework.data.repository.query.Param;
 import com.ecommerce.order.model.Orders;
 
 public interface OrderRepository extends JpaRepository<Orders, Long> {
-    List<Orders> findAllByUserProviderId(String providerId);
+    List<Orders> findAllByUserProviderIdOrderByOrderDateDesc(String providerId);
+    List<Orders> findAllByStoreIdOrderByOrderDateDesc(Long storeId);
 
     @Query("SELECT o FROM Orders o JOIN o.user u WHERE u.providerId = :providerId AND o.id = :orderId")
     Optional<Orders> findByIdAndProviderId(@Param("orderId") Long orderId, @Param("providerId") String providerId);
