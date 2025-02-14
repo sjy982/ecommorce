@@ -15,6 +15,7 @@ import com.ecommerce.common.response.ApiResponse;
 import com.ecommerce.common.response.ApiResponseUtil;
 import com.ecommerce.notification.dto.NotificationResponseDto;
 import com.ecommerce.notification.model.Notification;
+import com.ecommerce.notification.projection.NotificationProjection;
 import com.ecommerce.notification.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
@@ -28,30 +29,18 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @GetMapping("/unread")
-    public ResponseEntity<ApiResponse<List<NotificationResponseDto>>> getUnreadNotifications() {
+    public ResponseEntity<ApiResponse<List<NotificationProjection>>> getUnreadNotifications() {
         Long storeId = Long.parseLong((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-        List<Notification> notifications = notificationService.getUnReadNotifications(storeId);
-        List<NotificationResponseDto> responseDtoList = notifications.stream()
-                .map(notification -> NotificationResponseDto.builder()
-                        .id(notification.getId())
-                        .orderId(notification.getOrder().getId())
-                        .orderStatus(notification.getOrder().getStatus())
-                        .createdAt(notification.getCreatedAt()).build()).toList();
+        List<NotificationProjection> responseDtoList = notificationService.getUnReadNotifications(storeId);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponseUtil.createResponse(HttpStatus.OK.value(), responseDtoList, "success"));
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<NotificationResponseDto>>> getAllNotifications() {
+    public ResponseEntity<ApiResponse<List<NotificationProjection>>> getAllNotifications() {
         Long storeId = Long.parseLong((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-        List<Notification> notifications = notificationService.getAllNotifications(storeId);
-        List<NotificationResponseDto> responseDtoList = notifications.stream()
-                .map(notification -> NotificationResponseDto.builder()
-                        .id(notification.getId())
-                        .orderId(notification.getOrder().getId())
-                        .orderStatus(notification.getOrder().getStatus())
-                        .createdAt(notification.getCreatedAt()).build()).toList();
+        List<NotificationProjection> responseDtoList = notificationService.getAllNotifications(storeId);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponseUtil.createResponse(HttpStatus.OK.value(), responseDtoList, "success"));
@@ -59,7 +48,8 @@ public class NotificationController {
 
     @PatchMapping("/{notificationId}")
     public ResponseEntity<ApiResponse<Void>> markNotificationAsRead(@PathVariable Long notificationId) {
-        notificationService.markAsRead(notificationId);
+        Long storeId = Long.parseLong((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        notificationService.markAsRead(notificationId, storeId);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponseUtil.createResponse(HttpStatus.OK.value(), "알림이 확인됨"));
