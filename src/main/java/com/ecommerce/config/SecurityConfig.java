@@ -34,7 +34,8 @@ public class SecurityConfig  {
     private static final RequestMatcher PUBLIC_PATHS = RequestMatchers.anyOf(
             new AntPathRequestMatcher("/hc"),
             new AntPathRequestMatcher("/api/store", HttpMethod.POST.name()),
-            new AntPathRequestMatcher("/api/store/login", HttpMethod.POST.name())
+            new AntPathRequestMatcher("/api/store/login", HttpMethod.POST.name()),
+            new AntPathRequestMatcher("/api/users/join/test", HttpMethod.POST.name())
     );
     private static final String RT_PATH = "/api/users/refresh";
     private static final String JWT_PATH = "/api/**";

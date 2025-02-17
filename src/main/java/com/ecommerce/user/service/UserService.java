@@ -1,11 +1,15 @@
 package com.ecommerce.user.service;
 
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ecommerce.auth.jwt.JwtProvider;
 import com.ecommerce.cart.model.Cart;
+import com.ecommerce.cart.repository.CartRepository;
 import com.ecommerce.user.DTO.RegisterUserRequestDto;
 import com.ecommerce.user.DTO.RegisterUserResponseDto;
 import com.ecommerce.user.DTO.TokenResponseDto;
@@ -22,15 +26,19 @@ public class UserService {
     private final UserRedisService userRedisService;
     private final UserRepository userRepository;
 
+    private final CartRepository cartRepository;
+
     @Autowired
     public UserService(RefreshTokenRedisService refreshTokenRedisService,
                        JwtProvider jwtProvider,
                        UserRedisService userRedisService,
-                       UserRepository userRepository) {
+                       UserRepository userRepository,
+                       CartRepository cartRepository) {
         this.refreshTokenRedisService = refreshTokenRedisService;
         this.jwtProvider = jwtProvider;
         this.userRedisService = userRedisService;
         this.userRepository = userRepository;
+        this.cartRepository = cartRepository;
     }
 
     public RegisterUserResponseDto registerUser(String providerId, RegisterUserRequestDto registerUserRequestDto) {
@@ -79,5 +87,29 @@ public class UserService {
         Cart cart = userRepository.findCartByProviderId(providerId)
                 .orElseThrow(() -> new UsernameNotFoundException("cart not found"));
         return cart;
+    }
+
+    @Transactional
+    public String joinTestUser() {
+        Cart cart = new Cart();
+        cartRepository.save(cart);
+
+        String randomProviderId = UUID.randomUUID().toString();
+        String randomEmail = "test_user_" + randomProviderId + "@test.com";
+        Users user = Users.builder()
+             .providerId(randomProviderId)
+             .provider("google")
+             .subject("test_subject")
+             .email(randomEmail)
+             .name("test_name")
+             .phone("010-1234-1234")
+             .address("test_address")
+             .cart(cart)
+             .build();
+
+        userRepository.save(user);
+        userRepository.flush();
+
+        return jwtProvider.createAccessToken(randomProviderId, UserRole.USER.name());
     }
 }

@@ -18,6 +18,7 @@ import com.ecommerce.product.model.Product;
 import com.ecommerce.product.service.ProductService;
 import com.ecommerce.store.model.Store;
 
+import com.ecommerce.store.service.StoreService;
 import com.ecommerce.user.model.Users;
 
 import com.ecommerce.user.service.UserService;
@@ -31,15 +32,15 @@ public class OrderService {
     private final ProductService productService;
     private final UserService userService;
     private final NotificationService notificationService;
+    private final StoreService storeService;
 
     @Transactional
     public OrderProductResponseDto orderProduct(String userId, OrderProductRequestDto dto) {
-        Product product = productService.decreaseStock(dto.getProductId(), dto.getQuantity());
+        Product product = productService.findById(dto.getProductId());
+        productService.decreaseStock(product.getId(), dto.getQuantity()); //수량 감소
 
         Store store = product.getStore();
-        long totalPrice = product.getPrice() * dto.getQuantity();
-
-        store.setTotalSales(store.getTotalSales() + totalPrice);
+        storeService.increaseTotalSales(store.getId(), product.getPrice() * dto.getQuantity()); //총 금액 증가
 
         Users user = userService.findByProviderId(userId);
         Orders order = Orders.builder()
