@@ -89,6 +89,8 @@ spring:
               - profile
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      transaction-isolation: TRANSACTION_READ_COMMITTED
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}

@@ -32,6 +32,9 @@ import com.ecommerce.store.repository.StoreRepository;
 import com.ecommerce.user.model.Users;
 import com.ecommerce.user.repository.UserRepository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+
 @SpringBootTest
 @ActiveProfiles("test")
 class OrderServiceTest {
@@ -58,6 +61,9 @@ class OrderServiceTest {
 
     @Autowired
     private NotificationRepository notificationRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     private Users user;
     private Users user2;
@@ -137,6 +143,8 @@ class OrderServiceTest {
 
         // When
         OrderProductResponseDto responseDto = orderService.orderProduct(user.getProviderId(), requestDto);
+        entityManager.flush(); //orderProduct에서는 JPQL로 반영하는 작업이 있기 때문에 변경된 내용을 가져오려면 flush, clear가 필요
+        entityManager.clear();
 
         // Then
         assertEquals(product.getName(), responseDto.getOrderProduct().getName());
@@ -156,8 +164,8 @@ class OrderServiceTest {
         assertEquals(newNotifications.get(0).getOrderId(), newOrder.get(0).getId());
 
         // 업데이트 된 stock, totalSales 검사
-        assertEquals(90, updatedProduct.getStock());
-        assertEquals(2000, updatedStore.getTotalSales());
+        assertEquals(product.getStock() - requestDto.getQuantity(), updatedProduct.getStock());
+        assertEquals(store.getTotalSales() + (product.getPrice() * requestDto.getQuantity()), updatedStore.getTotalSales());
     }
 
     @Test
