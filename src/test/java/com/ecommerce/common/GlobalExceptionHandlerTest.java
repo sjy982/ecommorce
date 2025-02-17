@@ -2,9 +2,12 @@ package com.ecommerce.common;
 
 import static com.ecommerce.config.TestConstants.TEST_PROVIDER_ID;
 import static com.ecommerce.config.TestConstants.TEST_TEMP_ROLE;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.sql.SQLException;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,12 +15,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.ecommerce.order.DTO.OrderProductRequestDto;
+import com.ecommerce.order.service.OrderService;
 import com.ecommerce.security.WithMockCustomUser;
 import com.ecommerce.store.DTO.LoginStoreRequestDto;
 import com.ecommerce.store.DTO.RegisterStoreRequestDto;
@@ -46,6 +53,9 @@ class GlobalExceptionHandlerTest {
 
     @MockBean
     private StoreService storeService;
+
+    @MockBean
+    private OrderService orderService;
 
     @Test
     @DisplayName("유효하지 않은 DTO 요청으로 BAD_REQUEST 응답을 반환해야 한다")
@@ -180,5 +190,27 @@ class GlobalExceptionHandlerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(requestBody))
                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("CannotAcquireLockException 발생하면 InternalServerError를 응답해야 한다.")
+    @WithMockCustomUser(username = TEST_PROVIDER_ID, role = TEST_TEMP_ROLE)
+    void givenCannotAcquireLockException_whenHandleRuntimeExceptionException_thenReturnInternalServerError() throws Exception {
+        // CannotAcquireLockException 데드락이 발생하면 Spring에서 이 예외로 래핑되어 던져짐
+        OrderProductRequestDto requestDto = OrderProductRequestDto
+                .builder()
+                .productId(1L)
+                .quantity(10)
+                .deliveryAddress("testAddress")
+                .phoneNumber("010-1234-1234").build();
+
+        String requestBody = objectMapper.writeValueAsString(requestDto);
+        when(orderService.orderProduct(TEST_PROVIDER_ID, requestDto))
+                .thenThrow(CannotAcquireLockException.class);
+
+        mockMvc.perform(post("/api/orders")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(requestBody))
+               .andExpect(status().isInternalServerError());
     }
 }

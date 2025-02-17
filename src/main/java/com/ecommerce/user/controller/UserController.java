@@ -1,5 +1,7 @@
 package com.ecommerce.user.controller;
 
+import java.util.UUID;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -21,6 +23,7 @@ import com.ecommerce.user.DTO.TokenResponseDto;
 import com.ecommerce.user.model.Users;
 import com.ecommerce.user.service.UserService;
 
+import jakarta.persistence.EntityManager;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,5 +55,14 @@ public class UserController {
                 .header("Authorization", "Bearer " + tokens.getAccessToken())
                 .header("Refresh-Token", tokens.getRefreshToken())
                 .body(ApiResponseUtil.createResponse(HttpStatus.CREATED.value(), "refresh tokens"));
+    }
+
+    @PostMapping("/join/test")
+    public ResponseEntity<ApiResponse<String>> joinTestUser() {
+        String accessToken = userService.joinTestUser();
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .header("Authorization", "Bearer " + accessToken)
+                .body(ApiResponseUtil.createResponse(HttpStatus.CREATED.value(), accessToken,"test join success"));
     }
 }

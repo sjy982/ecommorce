@@ -46,10 +46,11 @@ public class ProductService {
         return product;
     }
 
-    public Product decreaseStock(long id, int quantity) {
-        Product product = checkQuantity(id, quantity);
-        product.setStock(product.getStock() - quantity);
-        return product;
+    public void decreaseStock(Long id, int quantity) {
+        int updated = productRepository.decreaseStock(id, quantity);
+        if(updated == 0) {
+            throw new UsernameNotFoundException("product not found");
+        }
     }
 
     public Product checkQuantity(long id, int quantity) {
