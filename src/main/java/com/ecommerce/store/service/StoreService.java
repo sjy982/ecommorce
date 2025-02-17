@@ -80,4 +80,11 @@ public class StoreService {
         Store store = storeRepository.findById(storeId).orElseThrow(() -> new UsernameNotFoundException("store not found"));
         return store;
     }
+
+    public void increaseTotalSales(Long storeId, long amount) {
+        int updated = storeRepository.increaseTotalSales(storeId, amount);
+        if(updated == 0) {
+            throw new UsernameNotFoundException("store not found");
+        }
+    }
 }

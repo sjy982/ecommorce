@@ -18,5 +18,4 @@ public interface OrderRepository extends JpaRepository<Orders, Long> {
 
     @Query("SELECT o FROM Orders o JOIN o.store s WHERE s.id = :storeId AND o.id = :orderId")
     Optional<Orders> findByIdAndStoreId(@Param("orderId") Long orderId, @Param("storeId") Long storeId);
-
 }

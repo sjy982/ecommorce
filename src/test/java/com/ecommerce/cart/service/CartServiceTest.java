@@ -100,7 +100,7 @@ class CartServiceTest {
                     .providerId("testProviderId2")
                     .provider("testProvider")
                     .address("testAddress")
-                    .email("testemail")
+                    .email("testemail2")
                     .phone("010-1234-1234")
                     .name("testName")
                     .cart(cart2)
