@@ -11,6 +11,9 @@ import com.ecommerce.user.model.Users;
 
 public interface UserRepository extends JpaRepository<Users, Long> {
     Optional<Users> findByProviderId(String providerId);
+
+    @Query("SELECT u.id FROM Users u WHERE u.providerId = :providerId")
+    Optional<Long> findIdByProviderId(@Param("providerId") String providerId);
     @Query("SELECT u.cart FROM Users u WHERE u.providerId = :providerId")
     Optional<Cart> findCartByProviderId(@Param("providerId") String providerId);
 }

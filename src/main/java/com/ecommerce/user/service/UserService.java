@@ -83,6 +83,12 @@ public class UserService {
         return user;
     }
 
+    public Long findIdByProviderId(String providerId) {
+        Long userId = userRepository.findIdByProviderId(providerId)
+                .orElseThrow(() -> new UsernameNotFoundException("user not found"));
+        return userId;
+    }
+
     public Cart findCartByProviderid(String providerId) {
         Cart cart = userRepository.findCartByProviderId(providerId)
                 .orElseThrow(() -> new UsernameNotFoundException("cart not found"));

@@ -7,6 +7,7 @@ import com.ecommerce.category.repository.CategoryRepository;
 import com.ecommerce.product.dto.RegisterProductRequestDto;
 import com.ecommerce.product.dto.RegisterProductResponseDto;
 import com.ecommerce.product.model.Product;
+import com.ecommerce.product.projection.PriceStoreIdProjection;
 import com.ecommerce.product.repository.ProductRepository;
 import com.ecommerce.store.model.Store;
 import com.ecommerce.store.repository.StoreRepository;
@@ -44,6 +45,12 @@ public class ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new UsernameNotFoundException("product not found"));
         return product;
+    }
+
+    public PriceStoreIdProjection findPriceAndStoreIdByProductId(Long productId) {
+        PriceStoreIdProjection priceStoreIdProjection = productRepository.findPriceAndStoreIdByProductId(productId)
+                .orElseThrow(() -> new UsernameNotFoundException("product not found"));
+        return priceStoreIdProjection;
     }
 
     public void decreaseStock(Long id, int quantity) {

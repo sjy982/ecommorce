@@ -14,7 +14,7 @@ import com.ecommerce.order.model.Orders;
 import com.ecommerce.order.repository.OrderRepository;
 import com.ecommerce.product.model.Product;
 
-
+import com.ecommerce.product.projection.PriceStoreIdProjection;
 import com.ecommerce.product.service.ProductService;
 import com.ecommerce.store.model.Store;
 
@@ -23,6 +23,8 @@ import com.ecommerce.user.model.Users;
 
 import com.ecommerce.user.service.UserService;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -34,19 +36,25 @@ public class OrderService {
     private final NotificationService notificationService;
     private final StoreService storeService;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     @Transactional
-    public OrderProductResponseDto orderProduct(String userId, OrderProductRequestDto dto) {
-        Product product = productService.findById(dto.getProductId());
-        productService.decreaseStock(product.getId(), dto.getQuantity()); //수량 감소
+    public OrderProductResponseDto orderProduct(String providerId, OrderProductRequestDto dto) {
+        PriceStoreIdProjection priceStoreIdProjection = productService.findPriceAndStoreIdByProductId(dto.getProductId());
 
-        Store store = product.getStore();
-        storeService.increaseTotalSales(store.getId(), product.getPrice() * dto.getQuantity()); //총 금액 증가
+        Product productRef = entityManager.getReference(Product.class, dto.getProductId());
+        productService.decreaseStock(productRef.getId(), dto.getQuantity());
 
-        Users user = userService.findByProviderId(userId);
+        Store storeRef = entityManager.getReference(Store.class, priceStoreIdProjection.getStoreId());
+        storeService.increaseTotalSales(storeRef.getId(), priceStoreIdProjection.getPrice() * dto.getQuantity()); //총 금액 증가
+
+        Users userRef = entityManager.getReference(Users.class, userService.findIdByProviderId(providerId));
+
         Orders order = Orders.builder()
-                .user(user)
-                .store(store)
-                .product(product)
+                .user(userRef)
+                .store(storeRef)
+                .product(productRef)
                 .quantity(dto.getQuantity())
                 .deliveryAddress(dto.getDeliveryAddress())
                 .phoneNumber(dto.getPhoneNumber())

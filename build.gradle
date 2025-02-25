@@ -29,6 +29,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'  // Actuator 활성화
+	implementation 'io.micrometer:micrometer-registry-prometheus'  // Prometheus 연동
+
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'

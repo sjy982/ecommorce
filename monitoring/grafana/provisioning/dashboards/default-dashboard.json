@@ -1,0 +1,8 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "my-dashboard",
+    "title": "Spring Boot & MySQL Monitoring",
+    "schemaVersion": 16
+  }
+}

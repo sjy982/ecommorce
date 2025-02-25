@@ -90,6 +90,8 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
+      maximum-pool-size: 20
+      minimum-idle: 10
       transaction-isolation: TRANSACTION_READ_COMMITTED
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -114,3 +116,15 @@ jwt:
   validity-in-milliseconds: ${JWT_VALIDITY_MS}
   rt-validity-in-milliseconds: ${JWT_RT_VALIDITY_MS}
   temp-validity-in-milliseconds: ${JWT_TEMP_VALIDITY_MS}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,metrics,prometheus"
+  endpoint:
+    prometheus:
+      enabled: true
+  metrics:
+    tags:
+      application: ecommerce-app # 애플리케이션 태그 설정
