@@ -27,6 +27,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+
 	implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'  // Actuator 활성화

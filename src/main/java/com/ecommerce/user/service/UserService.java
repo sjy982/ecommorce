@@ -3,6 +3,7 @@ package com.ecommerce.user.service;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,6 +84,7 @@ public class UserService {
         return user;
     }
 
+    @Cacheable(value = "userIdByProvider", key = "#providerId", cacheManager = "redisLongCacheManager")
     public Long findIdByProviderId(String providerId) {
         Long userId = userRepository.findIdByProviderId(providerId)
                 .orElseThrow(() -> new UsernameNotFoundException("user not found"));

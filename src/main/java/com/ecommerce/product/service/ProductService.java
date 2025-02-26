@@ -1,9 +1,11 @@
 package com.ecommerce.product.service;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import com.ecommerce.category.model.Category;
 import com.ecommerce.category.repository.CategoryRepository;
+import com.ecommerce.product.dto.PriceStoreIdDto;
 import com.ecommerce.product.dto.RegisterProductRequestDto;
 import com.ecommerce.product.dto.RegisterProductResponseDto;
 import com.ecommerce.product.model.Product;
@@ -47,10 +49,16 @@ public class ProductService {
         return product;
     }
 
-    public PriceStoreIdProjection findPriceAndStoreIdByProductId(Long productId) {
+    //@CacheEvict Price가 변경되는 부분에 이 어노테이션을 붙여줘야 됨 왜냐하면 캐시 데이터와 불일치가 발생하기 때문 -> 쉽게 말해 캐시 제거용
+    @Cacheable(value = "productPriceStoreId", key = "#productId")
+    public PriceStoreIdDto findPriceAndStoreIdByProductId(Long productId) {
         PriceStoreIdProjection priceStoreIdProjection = productRepository.findPriceAndStoreIdByProductId(productId)
                 .orElseThrow(() -> new UsernameNotFoundException("product not found"));
-        return priceStoreIdProjection;
+
+        return PriceStoreIdDto.builder()
+                .price(priceStoreIdProjection.getPrice())
+                .storeId(priceStoreIdProjection.getStoreId())
+                              .build();
     }
 
     public void decreaseStock(Long id, int quantity) {

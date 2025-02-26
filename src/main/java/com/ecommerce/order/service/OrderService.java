@@ -12,6 +12,7 @@ import com.ecommerce.order.DTO.OrderProductRequestDto;
 import com.ecommerce.order.DTO.OrderProductResponseDto;
 import com.ecommerce.order.model.Orders;
 import com.ecommerce.order.repository.OrderRepository;
+import com.ecommerce.product.dto.PriceStoreIdDto;
 import com.ecommerce.product.model.Product;
 
 import com.ecommerce.product.projection.PriceStoreIdProjection;
@@ -41,13 +42,13 @@ public class OrderService {
 
     @Transactional
     public OrderProductResponseDto orderProduct(String providerId, OrderProductRequestDto dto) {
-        PriceStoreIdProjection priceStoreIdProjection = productService.findPriceAndStoreIdByProductId(dto.getProductId());
+        PriceStoreIdDto priceStoreIdDto = productService.findPriceAndStoreIdByProductId(dto.getProductId());
 
         Product productRef = entityManager.getReference(Product.class, dto.getProductId());
         productService.decreaseStock(productRef.getId(), dto.getQuantity());
 
-        Store storeRef = entityManager.getReference(Store.class, priceStoreIdProjection.getStoreId());
-        storeService.increaseTotalSales(storeRef.getId(), priceStoreIdProjection.getPrice() * dto.getQuantity()); //총 금액 증가
+        Store storeRef = entityManager.getReference(Store.class, priceStoreIdDto.getStoreId());
+        storeService.increaseTotalSales(storeRef.getId(), priceStoreIdDto.getPrice() * dto.getQuantity()); //총 금액 증가
 
         Users userRef = entityManager.getReference(Users.class, userService.findIdByProviderId(providerId));
 
