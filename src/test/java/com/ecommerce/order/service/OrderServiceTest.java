@@ -10,6 +10,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.connection.RedisServerCommands.FlushOption;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,6 +68,10 @@ class OrderServiceTest {
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+
+
     private Users user;
     private Users user2;
     private Product product;
@@ -73,6 +80,12 @@ class OrderServiceTest {
 
     @BeforeEach
     void setup() {
+        redisTemplate.execute((RedisConnection connection) -> {
+            // 모든 DB를 플러시 (여기서는 동기 방식으로 설정)
+            connection.serverCommands().flushAll(FlushOption.SYNC);
+            return null; // 반환값이 필요 없다면 null
+        });
+
         Cart cart = new Cart();
         cartRepository.save(cart);
 
