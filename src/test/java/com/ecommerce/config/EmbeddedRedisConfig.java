@@ -24,17 +24,23 @@ public class EmbeddedRedisConfig {
 
     private static final String REDIS_SERVER_MAX_MEMORY = "maxmemory 128M";
 
-    @Value("${spring.data.redis.port}")
+    // 기본값 6379를 지정할 수도 있음 (application-test.properties에 정의해도 됨)
+    @Value("${spring.data.redis.port:6379}")
     private int redisPort;
 
     private RedisServer redisServer;
 
+    // 실제 사용한 포트를 저장할 필드
+    private int actualPort;
+
     @PostConstruct
     public void startRedis() {
+        // 기본 포트가 이미 사용 중이면 사용 가능한 다른 포트를 찾음
         int port = isRedisRunning() ? findAvailablePort() : redisPort;
+        actualPort = port; // 실제 사용한 포트를 저장
 
         if (isArmMac()) {
-            // ARM Mac용 바이너리를 사용
+            // ARM Mac용 바이너리 사용
             redisServer = new RedisServer(getRedisFileForArcMac(), port);
         } else {
             // 일반 x86 등
@@ -58,18 +64,18 @@ public class EmbeddedRedisConfig {
         }
     }
 
+    // 실제 사용 포트를 반환하는 getter
+    public int getActualPort() {
+        return actualPort;
+    }
+
     private boolean isArmMac() {
         return Objects.equals(System.getProperty("os.arch"), "aarch64")
                && Objects.equals(System.getProperty("os.name"), "Mac OS X");
     }
 
-    /**
-     * ARM 아키텍처를 사용하는 Mac에서 실행할 수 있는 redis-server 바이너리 파일
-     * test/resources/embedded-redis/redis-server-arm64
-     */
     private File getRedisFileForArcMac() {
         try {
-            // test/resources/embedded-redis/ 폴더 아래에 있는 바이너리
             return new ClassPathResource("embedded-redis/redis-server-arm64").getFile();
         } catch (Exception e) {
             throw new IllegalArgumentException("Could not load ARM Mac redis-server binary: " + e.getMessage(), e);
@@ -78,8 +84,7 @@ public class EmbeddedRedisConfig {
 
     private int findAvailablePort() {
         for (int port = 10000; port <= 65535; port++) {
-            Process process = executeGrepProcessCommand(port);
-            if (!isRunning(process)) {
+            if (!isPortInUse(port)) {
                 return port;
             }
         }
@@ -87,11 +92,16 @@ public class EmbeddedRedisConfig {
     }
 
     private boolean isRedisRunning() {
-        return isRunning(executeGrepProcessCommand(redisPort));
+        return isPortInUse(redisPort);
     }
 
-    private Process executeGrepProcessCommand(int redisPort) {
-        String command = String.format("netstat -nat | grep LISTEN | grep %d", redisPort);
+    private boolean isPortInUse(int port) {
+        Process process = executeGrepProcessCommand(port);
+        return isRunning(process);
+    }
+
+    private Process executeGrepProcessCommand(int port) {
+        String command = String.format("netstat -nat | grep LISTEN | grep %d", port);
         String[] shell = {"/bin/sh", "-c", command};
         try {
             return Runtime.getRuntime().exec(shell);
