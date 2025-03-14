@@ -22,10 +22,11 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '17'
-          distribution: 'temurin'  # 또는 'zulu', 'adopt' 등 원하는 JDK 배포판 지정
+          distribution: 'temurin'
 
-      
-      # 3. Create .env file using secrets
+      - name: Install net-tools
+        run: sudo apt-get update && sudo apt-get install -y net-tools
+
       - name: Create .env file
         run: |
           echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" > .env
