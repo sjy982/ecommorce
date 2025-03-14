@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisServerCommands.FlushOption;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -32,6 +33,7 @@ import com.ecommerce.cartItem.projection.CartItemProjection;
 import com.ecommerce.cartItem.repository.CartItemRepository;
 import com.ecommerce.category.model.Category;
 import com.ecommerce.category.repository.CategoryRepository;
+import com.ecommerce.config.EmbeddedRedisTestConfiguration;
 import com.ecommerce.order.DTO.OrderProductDto;
 import com.ecommerce.order.model.Orders;
 import com.ecommerce.order.repository.OrderRepository;
@@ -43,6 +45,7 @@ import com.ecommerce.store.repository.StoreRepository;
 import com.ecommerce.user.model.Users;
 import com.ecommerce.user.repository.UserRepository;
 
+@Import(EmbeddedRedisTestConfiguration.class)
 @SpringBootTest
 @ActiveProfiles("test")
 class CartServiceTest {
