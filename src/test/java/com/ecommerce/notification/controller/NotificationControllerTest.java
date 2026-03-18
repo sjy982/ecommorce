@@ -58,7 +58,7 @@ class NotificationControllerTest {
                     @Override
                     public Long getOrderId() { return 0L; }
                     @Override
-                    public OrderStatus getOrderStatus() { return OrderStatus.PENDING; }
+                    public OrderStatus getOrderStatus() { return OrderStatus.PENDING_PAYMENT; }
                     @Override
                     public LocalDateTime getCreatedAt() { return LocalDateTime.now(); }
                 },
@@ -68,7 +68,7 @@ class NotificationControllerTest {
                     @Override
                     public Long getOrderId() { return 1L; }
                     @Override
-                    public OrderStatus getOrderStatus() { return OrderStatus.PENDING; }
+                    public OrderStatus getOrderStatus() { return OrderStatus.PENDING_PAYMENT; }
                     @Override
                     public LocalDateTime getCreatedAt() { return LocalDateTime.now(); }
                 }
@@ -100,7 +100,7 @@ class NotificationControllerTest {
                     @Override
                     public Long getOrderId() { return 0L; }
                     @Override
-                    public OrderStatus getOrderStatus() { return OrderStatus.PENDING; }
+                    public OrderStatus getOrderStatus() { return OrderStatus.PENDING_PAYMENT; }
                     @Override
                     public LocalDateTime getCreatedAt() { return LocalDateTime.now(); }
                 },
@@ -110,7 +110,7 @@ class NotificationControllerTest {
                     @Override
                     public Long getOrderId() { return 1L; }
                     @Override
-                    public OrderStatus getOrderStatus() { return OrderStatus.PENDING; }
+                    public OrderStatus getOrderStatus() { return OrderStatus.PENDING_PAYMENT; }
                     @Override
                     public LocalDateTime getCreatedAt() { return LocalDateTime.now(); }
                 }

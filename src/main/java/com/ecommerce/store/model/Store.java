@@ -30,5 +30,9 @@ public class Store {
 
     @Column(nullable = false)
     private Long totalSales = 0L;
+
+    public void increaseTotalSales(long amount) {
+        totalSales += amount;
+    }
 }
 
