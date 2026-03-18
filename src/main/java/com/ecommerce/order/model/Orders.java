@@ -44,7 +44,7 @@ public class Orders {
     private LocalDateTime orderDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20, columnDefinition = "VARCHAR(20) CHECK (status IN ('PENDING', 'SHIPPED', 'DELIVERED', 'CANCELED'))")
+    @Column(nullable = false, length = 20, columnDefinition = "VARCHAR(30) CHECK (status IN ('PENDING_PAYMENT', 'PAID', 'PAYMENT_FAILED'))")
     private OrderStatus status;
 
     @Column(nullable = false)
@@ -56,6 +56,14 @@ public class Orders {
     @PrePersist
     public void prePersist() {
         orderDate = (orderDate == null) ? LocalDateTime.now() : orderDate;
-        status = (status == null) ? OrderStatus.PENDING : status;
+        status = (status == null) ? OrderStatus.PENDING_PAYMENT : status;
+    }
+
+    public void markPaid() {
+        status = OrderStatus.PAID;
+    }
+
+    public void markFailed() {
+        status = OrderStatus.PAYMENT_FAILED;
     }
 }

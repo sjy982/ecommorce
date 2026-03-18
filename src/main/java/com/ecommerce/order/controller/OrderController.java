@@ -32,7 +32,7 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<ApiResponse<OrderProductResponseDto>> orderProduct(@RequestBody @Valid OrderProductRequestDto dto) {
         String providerId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        OrderProductResponseDto responseDto = orderService.orderProduct(providerId, dto);
+        OrderProductResponseDto responseDto = orderService.orderProduct2(providerId, dto);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponseUtil.createResponse(HttpStatus.OK.value(), responseDto, "order success"));

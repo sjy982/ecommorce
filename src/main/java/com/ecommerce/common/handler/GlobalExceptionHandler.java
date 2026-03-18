@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.ecommerce.common.response.ApiResponse;
 import com.ecommerce.common.response.ApiResponseUtil;
+import com.ecommerce.payment.exception.PaymentFailedException;
 import com.ecommerce.store.Exception.InvalidPasswordException;
 import com.ecommerce.user.Exception.RefreshTokenException;
 import com.ecommerce.user.Exception.SessionExpiredException;
@@ -80,6 +81,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleInvalidPasswordException(InvalidPasswordException ex) {
         log.error("An error occurred: {}", ex.getMessage(), ex);
         HttpStatus httpStatus = HttpStatus.UNAUTHORIZED;
+        return ResponseEntity.status(httpStatus)
+                             .body(ApiResponseUtil.createResponse(httpStatus.value(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(PaymentFailedException.class)
+    public ResponseEntity<ApiResponse<Void>> handlePaymentFailedException(PaymentFailedException ex) {
+        log.error("An error occurred: {}", ex.getMessage(), ex);
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         return ResponseEntity.status(httpStatus)
                              .body(ApiResponseUtil.createResponse(httpStatus.value(), ex.getMessage()));
     }
