@@ -38,6 +38,15 @@ public class OrderController {
                 .body(ApiResponseUtil.createResponse(HttpStatus.OK.value(), responseDto, "order success"));
     }
 
+    @PostMapping("/payment")
+    public ResponseEntity<ApiResponse<OrderProductResponseDto>> orderProductAndPaymentRequest(@RequestBody @Valid OrderProductRequestDto dto) {
+        String providerId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        OrderProductResponseDto responseDto = orderService.orderProductAndPaymentRequest(providerId, dto);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponseUtil.createResponse(HttpStatus.OK.value(), responseDto, "order success"));
+    }
+
     @GetMapping("/user")
     public ResponseEntity<ApiResponse<List<OrderProductResponseDto>>> getAllUserOrders() {
         String providerId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
