@@ -2,6 +2,7 @@ package com.ecommerce.order.service;
 
 import java.util.List;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,8 +11,14 @@ import com.ecommerce.notification.service.NotificationService;
 import com.ecommerce.order.DTO.OrderProductDto;
 import com.ecommerce.order.DTO.OrderProductRequestDto;
 import com.ecommerce.order.DTO.OrderProductResponseDto;
+import com.ecommerce.order.model.OrderStatus;
 import com.ecommerce.order.model.Orders;
 import com.ecommerce.order.repository.OrderRepository;
+
+import com.ecommerce.payment.job.event.PaymentJobCreatedEvent;
+import com.ecommerce.payment.job.model.PaymentJob;
+import com.ecommerce.payment.job.model.PaymentJobStatus;
+import com.ecommerce.payment.job.repository.PaymentJobRepository;
 import com.ecommerce.product.model.Product;
 
 
@@ -33,27 +40,55 @@ public class OrderService {
     private final UserService userService;
     private final NotificationService notificationService;
     private final StoreService storeService;
-
+    private final ApplicationEventPublisher applicationEventPublisher;
+    private final PaymentJobRepository paymentJobRepository;
     @Transactional
     public OrderProductResponseDto orderProduct(String userId, OrderProductRequestDto dto) {
         Product product = productService.findById(dto.getProductId());
-        productService.decreaseStock(product.getId(), dto.getQuantity()); //수량 감소
+        productService.decreaseStock(product.getId(), dto.getQuantity());
 
         Store store = product.getStore();
-        storeService.increaseTotalSales(store.getId(), product.getPrice() * dto.getQuantity()); //총 금액 증가
+        storeService.increaseTotalSales(store.getId(), product.getPrice() * dto.getQuantity());
 
         Users user = userService.findByProviderId(userId);
         Orders order = Orders.builder()
-                .user(user)
-                .store(store)
-                .product(product)
-                .quantity(dto.getQuantity())
-                .deliveryAddress(dto.getDeliveryAddress())
-                .phoneNumber(dto.getPhoneNumber())
+                             .user(user)
+                             .store(store)
+                             .product(product)
+                             .quantity(dto.getQuantity())
+                             .deliveryAddress(dto.getDeliveryAddress())
+                             .phoneNumber(dto.getPhoneNumber())
                              .build();
 
         orderRepository.save(order);
         notificationService.createNotification(order);
+
+        return convertOrdersToOrderProductResponse(order);
+    }
+
+    @Transactional
+    public OrderProductResponseDto orderProductAndPaymentRequest(String providerId, OrderProductRequestDto dto) {
+        final Product product = productService.findByIdUpdate(dto.getProductId());
+        product.decreaseStock(dto.getQuantity());
+
+        final Orders order = Orders.builder()
+                                   .user(userService.findByProviderId(providerId))
+                                   .store(product.getStore())
+                                   .product(product)
+                                   .quantity(dto.getQuantity())
+                                   .deliveryAddress(dto.getDeliveryAddress())
+                                   .phoneNumber(dto.getPhoneNumber())
+                                   .status(OrderStatus.PENDING_PAYMENT)
+                                   .build();
+        orderRepository.save(order);
+
+        final PaymentJob paymentJob = PaymentJob.builder()
+                                                .status(PaymentJobStatus.PENDING)
+                                                .orderId(order.getId()).build();
+        paymentJobRepository.save(paymentJob);
+
+        applicationEventPublisher.publishEvent(PaymentJobCreatedEvent.builder()
+                                                       .id(paymentJob.getId()).build());
 
         return convertOrdersToOrderProductResponse(order);
     }
@@ -87,7 +122,12 @@ public class OrderService {
                                                             .price(order.getProduct().getPrice())
                                                             .quantity(order.getQuantity()).build())
                                       .deliveryAddress(order.getDeliveryAddress())
-                               .phoneNumber(order.getPhoneNumber()).build();
+                                      .phoneNumber(order.getPhoneNumber())
+                                      .status(order.getStatus()).build();
+    }
+
+    public Orders findById(Long orderId) {
+        return orderRepository.findById(orderId).orElseThrow(() -> new UsernameNotFoundException("order not found"));
     }
 
     private  Orders findByIdAndProviderId(Long orderId, String providerId) {

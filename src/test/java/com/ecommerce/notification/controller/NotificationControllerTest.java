@@ -58,7 +58,7 @@ class NotificationControllerTest {
                     @Override
                     public Long getOrderId() { return 0L; }
                     @Override
-                    public OrderStatus getOrderStatus() { return OrderStatus.PENDING; }
+                    public OrderStatus getOrderStatus() { return OrderStatus.PENDING_PAYMENT; }
                     @Override
                     public LocalDateTime getCreatedAt() { return LocalDateTime.now(); }
                 },
@@ -68,7 +68,7 @@ class NotificationControllerTest {
                     @Override
                     public Long getOrderId() { return 1L; }
                     @Override
-                    public OrderStatus getOrderStatus() { return OrderStatus.PENDING; }
+                    public OrderStatus getOrderStatus() { return OrderStatus.PENDING_PAYMENT; }
                     @Override
                     public LocalDateTime getCreatedAt() { return LocalDateTime.now(); }
                 }
@@ -83,10 +83,10 @@ class NotificationControllerTest {
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.data[0].id").value(0))
                .andExpect(jsonPath("$.data[0].orderId").value(0))
-               .andExpect(jsonPath("$.data[0].orderStatus").value("PENDING"))
+               .andExpect(jsonPath("$.data[0].orderStatus").value("PENDING_PAYMENT"))
                .andExpect(jsonPath("$.data[1].id").value(1))
                .andExpect(jsonPath("$.data[1].orderId").value(1))
-               .andExpect(jsonPath("$.data[1].orderStatus").value("PENDING"));
+               .andExpect(jsonPath("$.data[1].orderStatus").value("PENDING_PAYMENT"));
     }
 
     @Test
@@ -100,7 +100,7 @@ class NotificationControllerTest {
                     @Override
                     public Long getOrderId() { return 0L; }
                     @Override
-                    public OrderStatus getOrderStatus() { return OrderStatus.PENDING; }
+                    public OrderStatus getOrderStatus() { return OrderStatus.PENDING_PAYMENT; }
                     @Override
                     public LocalDateTime getCreatedAt() { return LocalDateTime.now(); }
                 },
@@ -110,7 +110,7 @@ class NotificationControllerTest {
                     @Override
                     public Long getOrderId() { return 1L; }
                     @Override
-                    public OrderStatus getOrderStatus() { return OrderStatus.PENDING; }
+                    public OrderStatus getOrderStatus() { return OrderStatus.PENDING_PAYMENT; }
                     @Override
                     public LocalDateTime getCreatedAt() { return LocalDateTime.now(); }
                 }
@@ -124,10 +124,10 @@ class NotificationControllerTest {
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.data[0].id").value(0))
                .andExpect(jsonPath("$.data[0].orderId").value(0))
-               .andExpect(jsonPath("$.data[0].orderStatus").value("PENDING"))
+               .andExpect(jsonPath("$.data[0].orderStatus").value("PENDING_PAYMENT"))
                .andExpect(jsonPath("$.data[1].id").value(1))
                .andExpect(jsonPath("$.data[1].orderId").value(1))
-               .andExpect(jsonPath("$.data[1].orderStatus").value("PENDING"));
+               .andExpect(jsonPath("$.data[1].orderStatus").value("PENDING_PAYMENT"));
     }
 
     @Test
