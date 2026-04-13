@@ -14,7 +14,7 @@ public class DispatcherConfig {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(50); //기본 유지되는 스레드 수
         executor.setMaxPoolSize(50); //최대 스레드 수
-        executor.setQueueCapacity(200); //대기 큐 크기
+        executor.setQueueCapacity(50); //대기 큐 크기
         return executor;
     }
 

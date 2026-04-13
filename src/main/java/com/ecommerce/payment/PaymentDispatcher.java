@@ -26,7 +26,7 @@ public class PaymentDispatcher {
     private final AtomicBoolean draining = new AtomicBoolean(false);
     private final AtomicBoolean newWorkRequested = new AtomicBoolean(false);
     private final AtomicBoolean wakeOnCompletion = new AtomicBoolean(false);
-    private final Semaphore permits = new Semaphore(230); //50 50 200으로 보수적으로 잡음.
+    private final Semaphore permits = new Semaphore(90);
 
     public PaymentDispatcher(PaymentJobService paymentJobService, PaymentStarter paymentStarter,
                              @Qualifier("paymentExecutor") ThreadPoolTaskExecutor paymentExecutor,
