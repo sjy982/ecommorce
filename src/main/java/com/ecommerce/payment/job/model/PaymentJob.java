@@ -33,4 +33,12 @@ public class PaymentJob {
     public void markProcessing() {
         status = PaymentJobStatus.PROCESSING;
     }
+
+    public void markDone() {
+        status = PaymentJobStatus.DONE;
+    }
+
+    public void markFailed() {
+        status = PaymentJobStatus.FAILED;
+    }
 }
