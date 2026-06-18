@@ -2,5 +2,7 @@ package com.ecommerce.payment.job.model;
 
 public enum PaymentJobStatus {
     PENDING,
-    PROCESSING
+    PROCESSING,
+    DONE,
+    FAILED
 }

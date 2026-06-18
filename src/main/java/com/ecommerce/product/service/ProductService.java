@@ -59,6 +59,13 @@ public class ProductService {
         }
     }
 
+    public void increaseStock(Long id, int quantity) {
+        int updated = productRepository.increaseStock(id, quantity);
+        if (updated == 0) {
+            throw new UsernameNotFoundException("product not found");
+        }
+    }
+
     public Product checkQuantity(long id, int quantity) {
         Product product = findById(id);
         if(product.getStock() < quantity) {

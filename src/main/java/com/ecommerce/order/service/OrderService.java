@@ -130,6 +130,11 @@ public class OrderService {
         return orderRepository.findById(orderId).orElseThrow(() -> new UsernameNotFoundException("order not found"));
     }
 
+    public Orders findByIdForUpdate(Long orderId) {
+        return orderRepository.findByIdForUpdate(orderId)
+                              .orElseThrow(() -> new UsernameNotFoundException("order not found"));
+    }
+
     private  Orders findByIdAndProviderId(Long orderId, String providerId) {
         Orders order = orderRepository.findByIdAndProviderId(orderId, providerId).orElseThrow(() -> new UsernameNotFoundException("order not found"));
         return order;

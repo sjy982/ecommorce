@@ -4,10 +4,13 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.ecommerce.order.model.Orders;
+
+import jakarta.persistence.LockModeType;
 
 public interface OrderRepository extends JpaRepository<Orders, Long> {
     List<Orders> findAllByUserProviderIdOrderByOrderDateDesc(String providerId);
@@ -18,4 +21,8 @@ public interface OrderRepository extends JpaRepository<Orders, Long> {
 
     @Query("SELECT o FROM Orders o JOIN o.store s WHERE s.id = :storeId AND o.id = :orderId")
     Optional<Orders> findByIdAndStoreId(@Param("orderId") Long orderId, @Param("storeId") Long storeId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT o FROM Orders o WHERE o.id = :orderId")
+    Optional<Orders> findByIdForUpdate(@Param("orderId") Long orderId);
 }
